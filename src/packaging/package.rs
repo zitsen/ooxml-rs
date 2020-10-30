@@ -187,5 +187,8 @@ fn open_and_save() {
     let package = OpenXmlPackage::open("examples/excel-demo/demo.xlsx").unwrap();
     // write back
     package.save_as("tests/write-back.xlsx").unwrap();
+    let package = OpenXmlPackage::open("examples/docx-demo/rust-docx-rs.docx").unwrap();
+    // write back
+    package.save_as("tests/write-back.docx").unwrap();
     // std::fs::remove_file("tests/write-back.xlsx").unwrap();
 }
