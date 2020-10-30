@@ -1,5 +1,4 @@
 mod error;
-mod package;
 mod xml;
 
 mod drawing;
@@ -9,4 +8,4 @@ mod presentation;
 mod spreadsheet;    
 mod wordprocessing;
 
-use error::*;
+//use error::*;

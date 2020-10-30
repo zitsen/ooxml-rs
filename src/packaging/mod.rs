@@ -1,6 +1,11 @@
+mod app_property;
+mod content_type;
+mod custom_property;
+mod element;
 mod package;
 mod part;
+mod property;
 mod relationship;
-mod zip;
-mod content_type;
+mod variant;
 mod xml;
+mod zip;

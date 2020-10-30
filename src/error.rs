@@ -10,6 +10,8 @@ pub enum OoxmlError {
     UriError(#[from] url::ParseError),
     #[error("xml error")]
     XmlError(#[from] quick_xml::Error),
+    #[error("xml deserialization error")]
+    XmlDeError(#[from] quick_xml::de::DeError),
     #[error("No content type in package")]
     PackageContentTypeError,
     #[error("unknown data store error")]

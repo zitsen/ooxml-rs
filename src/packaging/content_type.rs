@@ -1,15 +1,14 @@
-use linked_hash_map::LinkedHashMap;
 use std::fmt;
-use std::prelude::*;
-use std::io::prelude::*;
-use std::path::{Path};
 use std::fs::File;
+use std::io::prelude::*;
+use std::path::Path;
 
+use linked_hash_map::LinkedHashMap;
 use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
 
 use crate::error::OoxmlError;
 
-type ContentType = String;
+pub type ContentType = String;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
@@ -23,31 +22,41 @@ struct Override {
     part_name: String,
     content_type: ContentType,
 }
-#[derive(Debug, serde::Deserialize, serde::Serialize, PartialEq)]
-#[serde(rename_all = "PascalCase", untagged)]
-enum ContentTypeItem {
-    Default(Default),
-    Override(Override),
-}
+// #[derive(Debug, serde::Deserialize, serde::Serialize, PartialEq)]
+// #[serde(rename_all = "PascalCase", untagged)]
+// enum ContentTypeItem {
+//     Default(Default),
+//     Override(Override),
+// }
 
-impl ContentTypeItem {
-    pub fn new(content_type: &str) -> Self {
-        let mime: mime::Mime = content_type.parse().expect("unrecognized content type");
-        Self::new_default(mime.subtype().as_str(), content_type)
-    }
-    pub fn new_default(extension: &str, content_type: &str) -> Self {
-        ContentTypeItem::Default(Default {
-            extension: extension.into(),
-            content_type: content_type.into(),
-        })
-    }
-    pub fn new_override(part_name: &str, content_type: &str) -> Self {
-        ContentTypeItem::Override(Override {
-            part_name: part_name.into(),
-            content_type: content_type.into(),
-        })
-    }
-}
+// impl ContentTypeItem {
+//     pub fn new(content_type: &str) -> Self {
+//         let mime: mime::Mime = content_type.parse().expect("unrecognized content type");
+//         Self::new_default(mime.subtype().as_str(), content_type)
+//     }
+//     pub fn new_default(extension: &str, content_type: &str) -> Self {
+//         ContentTypeItem::Default(Default {
+//             extension: extension.into(),
+//             content_type: content_type.into(),
+//         })
+//     }
+//     pub fn new_override(part_name: &str, content_type: &str) -> Self {
+//         ContentTypeItem::Override(Override {
+//             part_name: part_name.into(),
+//             content_type: content_type.into(),
+//         })
+//     }
+// }
+// #[test]
+// fn test_content_type_serde() {
+//     let default = ContentTypeItem::new("image/png");
+
+//     let ser = quick_xml::se::to_string(&default).unwrap();
+//     assert_eq!(ser, r#"<Default Extension="png" ContentType="image/png"/>"#);
+//     let de: ContentTypeItem = quick_xml::de::from_str(&ser).unwrap();
+//     assert_eq!(default, de);
+//     println!("{:?}", de);
+// }
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct ContentTypes {
@@ -147,7 +156,9 @@ impl ContentTypes {
     /// follow OpenXML SDK function definitions, but not implemented.
     pub fn add_content_type() {}
     pub fn get_content_type() {}
-    pub fn delete_content_type() {}
+    pub fn delete_content_type(&mut self, content_type: &ContentType) {
+
+    }
 
     /// Save to file path.
     pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
@@ -221,22 +232,12 @@ impl ContentTypes {
     pub fn add_override_element(&mut self, part_name: String, content_type: ContentType) {
         self.overrides.insert(part_name, content_type);
     }
-}
-impl crate::packaging::xml::FromXml for ContentTypes {
-    fn from_xml(s: &str) -> Result<Self, OoxmlError> {
-        unimplemented!()
+
+    pub fn is_empty(&self) -> bool {
+        self.defaults.is_empty() && self.overrides.is_empty()
     }
 }
-#[test]
-fn test_content_type_serde() {
-    let default = ContentTypeItem::new("image/png");
 
-    let ser = quick_xml::se::to_string(&default).unwrap();
-    assert_eq!(ser, r#"<Default Extension="png" ContentType="image/png"/>"#);
-    let de: ContentTypeItem = quick_xml::de::from_str(&ser).unwrap();
-    assert_eq!(default, de);
-    println!("{:?}", de);
-}
 #[test]
 fn test_de() {
     let raw = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="png" ContentType="image/png"/><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/custom.xml" ContentType="application/vnd.openxmlformats-officedocument.custom-properties+xml"/><Override PartName="/xl/charts/chart1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/><Override PartName="/xl/charts/colors1.xml" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/><Override PartName="/xl/charts/style1.xml" ContentType="application/vnd.ms-office.chartstyle+xml"/><Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/drawings/drawing2.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/><Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>"#;
