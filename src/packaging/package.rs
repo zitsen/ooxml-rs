@@ -7,8 +7,8 @@ pub use crate::packaging::relationship::Relationships;
 use crate::packaging::app_property::AppProperties;
 use crate::packaging::xml::*;
 
-use std::collections::BTreeMap;
-use std::collections::LinkedList;
+
+
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -16,8 +16,8 @@ use std::path::Path;
 use zip::ZipArchive;
 
 use linked_hash_map::LinkedHashMap;
-use serde::{Deserialize, Serialize};
-use url::Url;
+
+
 
 use crate::packaging::content_type::CONTENT_TYPES_FILE;
 use crate::packaging::custom_property::CUSTOM_PROPERTIES_URI;
@@ -41,7 +41,7 @@ pub struct OpenXmlPackage {
 impl OpenXmlPackage {
     /// Open a OpenXML file path, parse everything into the memory.
     pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, OoxmlError> {
-        let mut file = std::fs::File::open(path)?;
+        let file = std::fs::File::open(path)?;
         Self::from_reader(file)
     }
     /// Parse OpenXML package from reader.
@@ -132,7 +132,7 @@ impl OpenXmlPackage {
     }
 
     /// A part is dirty if data has been changed.
-    pub fn is_dirty(&self, uri: &str) -> bool {
+    pub fn is_dirty(&self, _uri: &str) -> bool {
         unimplemented!()
     }
 
@@ -151,14 +151,14 @@ impl OpenXmlPackage {
 
     pub fn get_relationships() {}
 
-    pub fn get_relationships_by_type(relationship_type: String) {}
+    pub fn get_relationships_by_type(_relationship_type: String) {}
 
     pub fn relationship_exist(&self, id: &str) -> bool {
         self.relationships.contains(id)
     }
 
     pub fn create_part_core(&mut self, uri: &str, content_type: &ContentType) {
-        let mut part = OpenXmlPart::new_with_content_type(uri, content_type);
+        let part = OpenXmlPart::new_with_content_type(uri, content_type);
         self.parts.insert(uri.into(), part);
         // if content type is not exist, add to content types.
     }
@@ -168,7 +168,7 @@ impl OpenXmlPackage {
         content_type: &ContentType,
         data: &[u8],
     ) -> Result<(), OoxmlError> {
-        let mut part = OpenXmlPart::new(uri, content_type, data)?;
+        let part = OpenXmlPart::new(uri, content_type, data)?;
         self.parts.insert(uri.into(), part);
         // if content type is not exist, add to content types.
         Ok(())

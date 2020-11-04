@@ -1,13 +1,13 @@
-use crate::error::OoxmlError;
-use crate::packaging::content_type::ContentType;
+
+
 use crate::packaging::variant::*;
-use crate::packaging::xml::{FromXml, ToXml};
+
 
 use serde::{Deserialize, Serialize};
-use linked_hash_map::LinkedHashMap;
+
 
 use std::io::prelude::*;
-use std::{borrow::Cow, fmt, fs::File, path::Path};
+
 
 use super::xml::OpenXmlFromDeserialize;
 
@@ -87,7 +87,7 @@ impl OpenXmlFromDeserialize for AppProperties {}
 #[test]
 fn serde() {
     let raw = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>WPS 表格</Application><HeadingPairs><vt:vector size="2" baseType="variant"><vt:variant><vt:lpstr>工作表</vt:lpstr></vt:variant><vt:variant><vt:i4>2</vt:i4></vt:variant></vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="2" baseType="lpstr"><vt:lpstr>Sheet1</vt:lpstr><vt:lpstr>Sheet2</vt:lpstr></vt:vector></TitlesOfParts></Properties>"#;
-    let v = AppProperties::from_xml_str(raw).unwrap();
+    let v: AppProperties = crate::packaging::xml::FromXml::from_xml_str(raw).unwrap();
     println!("{:?}", v);
     let xml = quick_xml::se::to_string(&v).unwrap();
     const decl: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?>"#;

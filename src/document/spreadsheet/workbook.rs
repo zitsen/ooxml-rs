@@ -115,7 +115,7 @@ fn serde() {
     let str = workbook.to_xml_string().unwrap();
     println!("{}", str);
 
-    let sheet_names = workbook.sheet_names();
+    let _sheet_names = workbook.sheet_names();
     let workbook2: WorkbookPart = quick_xml::de::from_str(&str).unwrap();
     println!("{:?}", workbook2);
     assert_eq!(workbook, workbook2);

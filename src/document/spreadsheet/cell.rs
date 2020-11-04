@@ -17,7 +17,7 @@ impl CellValue {
         match self {
             CellValue::Null => "".to_string(),
             CellValue::String(v) => v.clone(),
-            CellValue::Bool(b) => panic!("unsupported cell type: bool"),
+            CellValue::Bool(_b) => panic!("unsupported cell type: bool"),
             _ => unimplemented!(),
         }
     }

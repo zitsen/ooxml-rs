@@ -1,6 +1,6 @@
-use std::io::Write;
 
-use crate::error::OoxmlError;
+
+
 use crate::packaging::namespace::Namespaces;
 use crate::packaging::xml::*;
 use serde::{Deserialize, Serialize};
@@ -177,9 +177,9 @@ pub struct StylesPart {
 
 impl StylesPart {
     pub fn default_spreadsheet_styles() -> StylesPart {
-        let mut namespaces =
+        let namespaces =
             Namespaces::new("http://schemas.openxmlformats.org/spreadsheetml/2006/main");
-        let num_fmts = NumberFormats::default();
+        let _num_fmts = NumberFormats::default();
         Self {
             namespaces,
             ..Default::default()

@@ -1,11 +1,11 @@
 use crate::error::OoxmlError;
-use crate::packaging::content_type::ContentType;
+
 use crate::packaging::variant::Variant;
 
 use serde::{Deserialize, Serialize};
 
 use std::io::prelude::*;
-use std::{borrow::Cow, fmt, fs::File, path::Path};
+use std::{fmt, fs::File, path::Path};
 
 pub const CUSTOM_PROPERTIES_URI: &str = "docProps/custom.xml";
 
@@ -84,14 +84,14 @@ impl CustomProperties {
 
     /// Save to file path.
     pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
-        let mut file = File::create(path)?;
+        let file = File::create(path)?;
         self.write(file)
     }
 
     /// Write to an writer
-    pub fn write<W: std::io::Write>(&self, mut writer: W) -> Result<(), OoxmlError> {
+    pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
         let mut xml = quick_xml::Writer::new(writer);
-        use quick_xml::events::attributes::Attribute;
+        
         use quick_xml::events::*;
 
         // 1. write decl

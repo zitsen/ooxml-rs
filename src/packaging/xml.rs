@@ -92,11 +92,11 @@ impl<T: OpenXmlLeafTextElement + OpenXmlElementInfo> OpenXmlElement for T {
         unreachable!()
     }
 
-    fn add_namespace_declaration(&mut self, prefix: &str, uri: &str) {
+    fn add_namespace_declaration(&mut self, _prefix: &str, _uri: &str) {
         unreachable!()
     }
 
-    fn remove_namespace_declaration(&mut self, prefix: &str) {
+    fn remove_namespace_declaration(&mut self, _prefix: &str) {
         unreachable!()
     }
 
@@ -108,11 +108,11 @@ impl<T: OpenXmlLeafTextElement + OpenXmlElementInfo> OpenXmlElement for T {
         unreachable!()
     }
 
-    fn set_attribute(&mut self, attribute: Attribute) {
+    fn set_attribute(&mut self, _attribute: Attribute) {
         unreachable!()
     }
 
-    fn remove_attribute(&mut self, local_name: &str, namespace_uri: &str) {
+    fn remove_attribute(&mut self, _local_name: &str, _namespace_uri: &str) {
         unreachable!()
     }
 
@@ -124,11 +124,11 @@ impl<T: OpenXmlLeafTextElement + OpenXmlElementInfo> OpenXmlElement for T {
         false
     }
 
-    fn write_children<W: Write>(&self, writer: W) -> Result<(), OoxmlError> {
+    fn write_children<W: Write>(&self, _writer: W) -> Result<(), OoxmlError> {
         unreachable!()
     }
 
-    fn get_attribute(&self, name: &str) {
+    fn get_attribute(&self, _name: &str) {
         unreachable!()
     }
 

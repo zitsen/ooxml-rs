@@ -8,7 +8,7 @@ use std::io::Cursor;
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-use url::Url;
+
 #[derive(Debug, Clone, Default)]
 pub struct OpenXmlPart {
     uri: PathBuf,
@@ -36,7 +36,7 @@ impl OpenXmlPart {
         }
     }
 
-    pub fn new<S: Into<PathBuf>, C: Into<ContentType>, R: Read>(uri: S, content_type: C, mut reader: R) -> Result<Self, OoxmlError> {
+    pub fn new<S: Into<PathBuf>, C: Into<ContentType>, R: Read>(uri: S, _content_type: C, mut reader: R) -> Result<Self, OoxmlError> {
         let mut raw = Cursor::new(Vec::new());
         std::io::copy(&mut reader, &mut raw)?;
         let part = Self {

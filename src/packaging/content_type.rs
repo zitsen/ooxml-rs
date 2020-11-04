@@ -87,7 +87,7 @@ impl<'de> Visitor<'de> for ContentTypesVisitor {
             let key: String = key;
             match &key {
                 s if s == XmlnsAttributeName => {
-                    let xmlns: String = access.next_value()?;
+                    let _xmlns: String = access.next_value()?;
                 }
                 s if s == TypesTagName => {
                     //let v: Vec<String> = access.next_value()?;
@@ -156,18 +156,18 @@ impl ContentTypes {
     /// follow OpenXML SDK function definitions, but not implemented.
     pub fn add_content_type() {}
     pub fn get_content_type() {}
-    pub fn delete_content_type(&mut self, content_type: &ContentType) {
+    pub fn delete_content_type(&mut self, _content_type: &ContentType) {
 
     }
 
     /// Save to file path.
     pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
-        let mut file = File::create(path)?;
+        let file = File::create(path)?;
         self.write(file)
     }
 
     /// Write to an writer
-    pub fn write<W: std::io::Write>(&self, mut writer: W) -> Result<(), OoxmlError> {
+    pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
         let mut xml = quick_xml::Writer::new(writer);
         use quick_xml::events::attributes::Attribute;
         use quick_xml::events::*;

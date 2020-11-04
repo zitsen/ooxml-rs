@@ -22,10 +22,10 @@ mod style;
 mod workbook;
 mod worksheet;
 
-use self::chart::ChartPart;
+
 use self::document_type::SpreadsheetDocumentType;
-use self::drawing::DrawingPart;
-use self::media::MediaPart;
+
+
 use self::shared_string::SharedStringsPart;
 use self::style::StylesPart;
 use self::workbook::WorkbookPart;
@@ -201,7 +201,7 @@ impl Workbook {
     }
 
     /// Add a worksheet.
-    pub fn add_worksheet(&mut self, name: &str) -> &mut Worksheet {
+    pub fn add_worksheet(&mut self, _name: &str) -> &mut Worksheet {
         unimplemented!()
         // let sheet = Worksheet {
         //     parts: self.parts.clone(),
@@ -279,6 +279,6 @@ fn open() {
 
     let workbook = xlsx.get_workbook();
 
-    let sheet_names = workbook.worksheet_names();
+    let _sheet_names = workbook.worksheet_names();
     println!("{:?}", xlsx);
 }
