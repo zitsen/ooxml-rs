@@ -1,7 +1,9 @@
 use super::cell::CellValue;
 use crate::packaging::namespace::Namespaces;
-use crate::packaging::xml::*;
+use crate::packaging::element::*;
 
+use std::borrow::Cow;
+use quick_xml::events::attributes::Attribute;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -111,26 +113,20 @@ impl OpenXmlElementInfo for WorksheetPart {
     }
 }
 
-impl OpenXmlFromDeserialize for WorksheetPart {}
+impl OpenXmlDeserializeDefault for WorksheetPart {}
 
-impl ToXml for WorksheetPart {
-    fn write<W: std::io::Write>(&self, writer: W) -> Result<(), crate::error::OoxmlError> {
+
+
+impl OpenXmlSerialize for WorksheetPart {
+    fn namespaces(&self) -> Option<Cow<Namespaces>> {
+        Some(Cow::Borrowed(&self.namespaces))
+    }
+    fn attributes(&self) -> Option<Vec<Attribute>> {
+        None
+    }
+    fn write_inner<W: std::io::Write>(&self, writer: W) -> Result<(), crate::error::OoxmlError> {
         let mut xml = quick_xml::Writer::new(writer);
         use quick_xml::events::*;
-
-        // 1. write decl
-        xml.write_event(Event::Decl(BytesDecl::new(
-            b"1.0",
-            Some(b"UTF-8"),
-            Some(b"yes"),
-        )))?;
-        // quick_xml::se::to_writer(xml.inner(), self).unwrap();
-
-        // 2. start types element
-        let mut elem = BytesStart::borrowed_name(Self::tag_name().as_bytes());
-        elem.extend_attributes(self.namespaces.to_xml_attributes());
-        xml.write_event(Event::Start(elem))?;
-        //xml.flush();
 
         quick_xml::se::to_writer(xml.inner(), &self.sheet_pr)?;
         quick_xml::se::to_writer(xml.inner(), &self.sheet_views)?;
@@ -140,9 +136,6 @@ impl ToXml for WorksheetPart {
         quick_xml::se::to_writer(xml.inner(), &self.page_margins)?;
         quick_xml::se::to_writer(xml.inner(), &self.header_footer)?;
 
-        // ends types element.
-        let end = BytesEnd::borrowed(Self::tag_name().as_bytes());
-        xml.write_event(Event::End(end))?;
         Ok(())
     }
 }

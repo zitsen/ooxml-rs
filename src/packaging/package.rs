@@ -5,7 +5,7 @@ use crate::packaging::custom_property::CustomProperties;
 use crate::packaging::part::OpenXmlPart;
 use crate::packaging::property::Properties;
 pub use crate::packaging::relationship::Relationships;
-use crate::packaging::xml::*;
+use crate::packaging::element::*;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -75,7 +75,7 @@ impl OpenXmlPackage {
             } else if filename == APP_PROPERTIES_URI {
                 let mut xml = String::new();
                 file.read_to_string(&mut xml)?;
-                package.app_properties = FromXml::from_xml_str(&xml)?;
+                package.app_properties = OpenXmlDeserialize::from_xml_str(&xml)?;
             } else {
                 let uri = std::path::PathBuf::from(&filename);
                 let part = OpenXmlPart::from_reader(uri, &mut file)?;

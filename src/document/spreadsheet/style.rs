@@ -1,5 +1,5 @@
 use crate::packaging::namespace::Namespaces;
-use crate::packaging::xml::*;
+use crate::packaging::element::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -15,8 +15,11 @@ impl OpenXmlElementInfo for NumberFormat {
     fn tag_name() -> &'static str {
         "numFmt"
     }
+    fn element_type() -> OpenXmlElementType {
+        OpenXmlElementType::Node
+    }
 }
-impl OpenXmlFromDeserialize for NumberFormat {}
+impl OpenXmlDeserializeDefault for NumberFormat {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "numFmts")]
@@ -24,12 +27,8 @@ pub struct NumberFormats {
     #[serde(rename = "numFmt")]
     num_fmt: Vec<NumberFormat>,
 }
-impl OpenXmlFromDeserialize for NumberFormats {}
-// impl ToXml for NumberFormats {
-//     fn write<W: Write>(&self, writer: W) -> Result<(), OoxmlError> {
+impl OpenXmlDeserializeDefault for NumberFormats {}
 
-//     }
-// }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "numFmt")]
@@ -206,7 +205,7 @@ impl OpenXmlElementInfo for StylesPart {
     }
 }
 
-impl OpenXmlFromDeserialize for StylesPart {}
+impl OpenXmlDeserializeDefault for StylesPart {}
 
 // impl fmt::Display for SharedStringsPart {
 //     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

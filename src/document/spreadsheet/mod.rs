@@ -9,7 +9,7 @@ use derivative::Derivative;
 use crate::{
     error::Result,
     packaging::package::{OpenXmlPackage, Relationships},
-    packaging::xml::*,
+    packaging::element::*,
 };
 
 mod cell;

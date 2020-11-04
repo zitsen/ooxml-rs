@@ -15,7 +15,7 @@ pub const SHARED_STRINGS_TAG: &str = "sst";
 pub const SHARED_STRING_TAG: &str = "si";
 
 use crate::packaging::namespace::Namespaces;
-use crate::packaging::xml::*;
+use crate::packaging::element::*;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"), rename = "t")]
@@ -67,7 +67,7 @@ impl OpenXmlElementInfo for SharedStringsPart {
     }
 }
 
-impl OpenXmlFromDeserialize for SharedStringsPart {}
+impl OpenXmlDeserializeDefault for SharedStringsPart {}
 
 impl fmt::Display for SharedStringsPart {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

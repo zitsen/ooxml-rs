@@ -8,7 +8,7 @@ pub mod part;
 pub mod property;
 pub mod relationship;
 pub mod variant;
-pub mod xml;
-pub mod zip;
+// pub mod xml;
+// pub mod zip;
 
 pub use package::OpenXmlPackage;

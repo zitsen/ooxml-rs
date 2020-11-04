@@ -1,8 +1,8 @@
 use std::{borrow::Cow, io::Write};
 
 use super::namespace::Namespaces;
-use super::xml::OpenXmlFromDeserialize;
-use super::{variant::*, xml::*};
+use super::element::*;
+use super::variant::*;
 
 use quick_xml::events::attributes::Attribute;
 use serde::{Deserialize, Serialize};
@@ -94,12 +94,12 @@ impl OpenXmlElementInfo for AppProperties {
         APP_PROPERTIES_TAG
     }
 
-    fn element_type() -> super::xml::OpenXmlElementType {
-        super::xml::OpenXmlElementType::Root
+    fn element_type() -> OpenXmlElementType {
+        OpenXmlElementType::Root
     }
 }
 
-impl OpenXmlElementExt for AppProperties {
+impl OpenXmlSerialize for AppProperties {
     fn namespaces(&self) -> Option<Cow<Namespaces>> {
         Some(Cow::Borrowed(&self.namespaces))
     }
@@ -143,12 +143,12 @@ impl OpenXmlElementExt for AppProperties {
         Ok(())
     }
 }
-impl OpenXmlFromDeserialize for AppProperties {}
+impl OpenXmlDeserializeDefault for AppProperties {}
 
 #[test]
 fn serde() {
     let raw = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>WPS 表格</Application><HeadingPairs><vt:vector size="2" baseType="variant"><vt:variant><vt:lpstr>工作表</vt:lpstr></vt:variant><vt:variant><vt:i4>2</vt:i4></vt:variant></vt:vector></HeadingPairs><TitlesOfParts><vt:vector size="2" baseType="lpstr"><vt:lpstr>Sheet1</vt:lpstr><vt:lpstr>Sheet2</vt:lpstr></vt:vector></TitlesOfParts></Properties>"#;
-    let v: AppProperties = crate::packaging::xml::FromXml::from_xml_str(raw).unwrap();
+    let v: AppProperties = AppProperties::from_xml_str(raw).unwrap();
     println!("{:?}", v);
     // let xml = quick_xml::se::to_string(&v).unwrap();
     let xml = v.to_xml_string().unwrap();
