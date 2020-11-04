@@ -110,9 +110,7 @@ impl ToXml for WorkbookPart {
 
 #[test]
 fn serde() {
-    let xml = include_str!("../../../examples/excel-demo/xl/workbook.xml");
-    println!("{}", xml);
-    let workbook = WorkbookPart::from_xml_str(xml).unwrap();
+    let workbook = WorkbookPart::from_xml_file("examples/simple-spreadsheet/xl/workbook.xml").unwrap();
     println!("{:?}", workbook);
     let str = workbook.to_xml_string().unwrap();
     println!("{}", str);
