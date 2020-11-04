@@ -86,18 +86,18 @@ impl<'de> Visitor<'de> for ContentTypesVisitor {
         while let Some(key) = access.next_key()? {
             let key: String = key;
             match &key {
-                s if s == XmlnsAttributeName => {
+                s if s == XMLNS_ATTRIBUTE_NAME => {
                     let _xmlns: String = access.next_value()?;
                 }
-                s if s == TypesTagName => {
+                s if s == TYPES_TAG_NAME => {
                     //let v: Vec<String> = access.next_value()?;
                     unreachable!();
                 }
-                s if s == DefaultTagName => {
+                s if s == DEFAULT_TAG_NAME => {
                     let v: Default = access.next_value()?;
                     types.add_default_element(v.extension, v.content_type);
                 }
-                s if s == OverrideTagName => {
+                s if s == OVERRIDE_TAG_NAME => {
                     let v: Override = access.next_value()?;
                     types.add_override_element(v.part_name, v.content_type);
                 }
@@ -121,15 +121,15 @@ impl<'de> Deserialize<'de> for ContentTypes {
 }
 
 pub const CONTENT_TYPES_FILE: &'static str = "[Content_Types].xml";
-pub const TypesNamespaceUri: &'static str =
+pub const TYPES_NAMESPACE_URI: &'static str =
     "http://schemas.openxmlformats.org/package/2006/content-types";
-pub const TypesTagName: &'static str = "Types";
-pub const DefaultTagName: &'static str = "Default";
-pub const OverrideTagName: &'static str = "Override";
-pub const PartNameAttributeName: &'static str = "PartName";
-pub const ExtensionAttributeName: &'static str = "Extension";
-pub const ContentTypeAttributeName: &'static str = "ContentType";
-pub const XmlnsAttributeName: &'static str = "xmlns";
+pub const TYPES_TAG_NAME: &'static str = "Types";
+pub const DEFAULT_TAG_NAME: &'static str = "Default";
+pub const OVERRIDE_TAG_NAME: &'static str = "Override";
+pub const PART_NAME_ATTRIBUTE_NAME: &'static str = "PartName";
+pub const EXTENSION_ATTRIBUTE_NAME: &'static str = "Extension";
+pub const CONTENT_TYPE_ATTRIBUTE_NAME: &'static str = "ContentType";
+pub const XMLNS_ATTRIBUTE_NAME: &'static str = "xmlns";
 
 impl fmt::Display for ContentTypes {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -180,10 +180,10 @@ impl ContentTypes {
         )))?;
 
         // 2. start types element
-        let mut elem = BytesStart::borrowed_name(TypesTagName.as_bytes());
+        let mut elem = BytesStart::borrowed_name(TYPES_TAG_NAME.as_bytes());
         let ns = Attribute {
-            key: XmlnsAttributeName.as_bytes(),
-            value: TypesNamespaceUri.as_bytes().into(),
+            key: XMLNS_ATTRIBUTE_NAME.as_bytes(),
+            value: TYPES_NAMESPACE_URI.as_bytes().into(),
         };
         elem.extend_attributes(vec![ns]);
         xml.write_event(Event::Start(elem))?;
@@ -191,13 +191,13 @@ impl ContentTypes {
         // 3. write default entries
         for (key, value) in &self.defaults {
             xml.write_event(Event::Empty(
-                BytesStart::borrowed_name(DefaultTagName.as_bytes()).with_attributes(vec![
+                BytesStart::borrowed_name(DEFAULT_TAG_NAME.as_bytes()).with_attributes(vec![
                     Attribute {
-                        key: ExtensionAttributeName.as_bytes(),
+                        key: EXTENSION_ATTRIBUTE_NAME.as_bytes(),
                         value: key.as_bytes().into(),
                     },
                     Attribute {
-                        key: ContentTypeAttributeName.as_bytes(),
+                        key: CONTENT_TYPE_ATTRIBUTE_NAME.as_bytes(),
                         value: value.as_bytes().into(),
                     },
                 ]),
@@ -207,20 +207,20 @@ impl ContentTypes {
         // 4. write override entries
         for (key, value) in &self.overrides {
             xml.write_event(Event::Empty(
-                BytesStart::borrowed_name(OverrideTagName.as_bytes()).with_attributes(vec![
+                BytesStart::borrowed_name(OVERRIDE_TAG_NAME.as_bytes()).with_attributes(vec![
                     Attribute {
-                        key: PartNameAttributeName.as_bytes(),
+                        key: PART_NAME_ATTRIBUTE_NAME.as_bytes(),
                         value: key.as_bytes().into(),
                     },
                     Attribute {
-                        key: ContentTypeAttributeName.as_bytes(),
+                        key: CONTENT_TYPE_ATTRIBUTE_NAME.as_bytes(),
                         value: value.as_bytes().into(),
                     },
                 ]),
             ))?;
         }
         // ends types element.
-        let end = BytesEnd::borrowed(TypesTagName.as_bytes());
+        let end = BytesEnd::borrowed(TYPES_TAG_NAME.as_bytes());
         xml.write_event(Event::End(end))?;
         Ok(())
     }

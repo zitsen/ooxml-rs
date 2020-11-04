@@ -259,7 +259,7 @@ impl SpreadsheetDocument {
     }
 
     /// Serialize all parts to package.
-    fn flush(&self) {
+    pub fn flush(&self) {
         unimplemented!()
     }
     /// Get workbook

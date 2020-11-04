@@ -119,7 +119,7 @@ impl CustomProperties {
         //elem.extend_attributes(vec![nsattr!(CUSTOM_PROPERTIES), nsattr!(VT)]);
         elem.extend_attributes(self.namespaces.to_xml_attributes());
         xml.write_event(Event::Start(elem))?;
-        quick_xml::se::to_writer(xml.inner(), &self.properties);
+        quick_xml::se::to_writer(xml.inner(), &self.properties)?;
 
         // // ends types element.
         let end = BytesEnd::borrowed(CUSTOM_PROPERTIES_TAG.as_bytes());

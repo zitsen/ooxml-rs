@@ -1,15 +1,9 @@
 
 
-use crate::packaging::variant::*;
-
+use super::variant::*;
+use super::xml::OpenXmlFromDeserialize;
 
 use serde::{Deserialize, Serialize};
-
-
-use std::io::prelude::*;
-
-
-use super::xml::OpenXmlFromDeserialize;
 
 pub const APP_PROPERTIES_URI: &str = "docProps/app.xml";
 

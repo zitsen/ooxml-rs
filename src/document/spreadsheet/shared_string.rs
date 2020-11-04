@@ -5,12 +5,12 @@ use serde::{Deserialize, Serialize};
 use std::io::prelude::*;
 use std::{fmt, fs::File, path::Path};
 
-pub const SHARED_STRINGS_URI: &str = "xl/sharedStrings.xml";
+// pub const SHARED_STRINGS_URI: &str = "xl/sharedStrings.xml";
 
 pub const SHARED_STRINGS_TAG: &str = "sst";
-pub const SHARED_STRINGS_NAMESPACE_ATTRIBUTE: &str = "xmlns";
-pub const SHARED_STRINGS_NAMESPACE: &str =
-    "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+// pub const SHARED_STRINGS_NAMESPACE_ATTRIBUTE: &str = "xmlns";
+// pub const SHARED_STRINGS_NAMESPACE: &str =
+    // "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 
 pub const SHARED_STRING_TAG: &str = "si";
 
@@ -125,10 +125,10 @@ impl SharedStringsPart {
         xml.write_event(Event::Start(elem))?;
         for si in &self.strings {
             let elem = BytesStart::borrowed_name(SHARED_STRING_TAG.as_bytes());
-            xml.write_event(Event::Start(elem));
-            quick_xml::se::to_writer(xml.inner(), &si.t);
+            xml.write_event(Event::Start(elem))?;
+            quick_xml::se::to_writer(xml.inner(), &si.t)?;
             let end = BytesEnd::borrowed(SHARED_STRING_TAG.as_bytes());
-            xml.write_event(Event::End(end));
+            xml.write_event(Event::End(end))?;
         }
         
 
