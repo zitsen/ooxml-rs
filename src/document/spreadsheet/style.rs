@@ -20,7 +20,6 @@ impl OpenXmlElementInfo for NumberFormat {
     }
 }
 impl OpenXmlFromDeserialize for NumberFormat {}
-impl OpenXmlSerializeTo for NumberFormat {}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "numFmts")]

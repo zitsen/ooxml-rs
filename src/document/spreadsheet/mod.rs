@@ -7,7 +7,7 @@ use std::{path::Path, rc::Rc};
 use derivative::Derivative;
 
 use crate::{
-    error::OoxmlError,
+    error::Result,
     packaging::package::{OpenXmlPackage, Relationships},
     packaging::xml::*,
 };
@@ -232,7 +232,7 @@ impl SpreadsheetDocument {
     }
 
     /// Open existing spreadsheet file and parse.
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self, OoxmlError> {
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
         let package = OpenXmlPackage::open(path)?;
         let package = Rc::new(RefCell::new(package));
         let parts = SpreadsheetParts::from_package(package.clone());
@@ -249,7 +249,7 @@ impl SpreadsheetDocument {
         })
     }
     /// Save as new file with `path`.
-    pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
+    pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<()> {
         self.package.borrow().save_as(path)?;
         Ok(())
     }

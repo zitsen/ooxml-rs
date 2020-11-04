@@ -61,6 +61,10 @@ impl OpenXmlElementInfo for SharedStringsPart {
     fn tag_name() -> &'static str {
         "sst"
     }
+
+    fn element_type() -> OpenXmlElementType {
+        OpenXmlElementType::Root
+    }
 }
 
 impl OpenXmlFromDeserialize for SharedStringsPart { }

@@ -17,3 +17,5 @@ pub enum OoxmlError {
     #[error("unknown data store error")]
     Unknown,
 }
+
+pub type Result<T> = std::result::Result<T, OoxmlError>;
