@@ -1,6 +1,7 @@
-use std::{fs::File, io::prelude::*, path::Path};
-use std::marker::Sized;
+//! There's some marker trait and helper trait for XML (de)serializing.
 use std::io::BufReader;
+use std::marker::Sized;
+use std::{borrow::Cow, fs::File, io::prelude::*, path::Path};
 
 use crate::error::OoxmlError;
 
@@ -24,7 +25,9 @@ pub trait FromXml: Sized {
     }
 }
 
-impl<T: serde::de::DeserializeOwned + Sized> FromXml for T {
+pub trait OpenXmlFromDeserialize: serde::de::DeserializeOwned {}
+
+impl<T: OpenXmlFromDeserialize> FromXml for T {
     fn from_xml_reader<R: BufRead>(reader: R) -> Result<Self, OoxmlError> {
         Ok(quick_xml::de::from_reader(reader)?)
     }
@@ -32,6 +35,8 @@ impl<T: serde::de::DeserializeOwned + Sized> FromXml for T {
 pub trait ToXml: Sized {
     /// Implement the write method, the trait will do the rest.
     fn write<W: Write>(&self, writer: W) -> Result<(), OoxmlError>;
+
+    //fn write_inner_xml(&self)
 
     /// Write standalone xml to the writer.
     ///
@@ -65,14 +70,102 @@ pub trait ToXml: Sized {
     }
 }
 
-impl<T: serde::ser::Serialize + Sized> ToXml for T {
+pub trait OpenXmlSerializeTo: serde::ser::Serialize {}
+
+impl<T: OpenXmlSerializeTo> ToXml for T {
     fn write<W: Write>(&self, writer: W) -> Result<(), OoxmlError> {
         quick_xml::se::to_writer(writer, self)?;
         Ok(())
     }
 }
 
-pub trait OpenXmlElement: FromXml + ToXml {
+pub trait OpenXmlLeafTextElement: OpenXmlFromDeserialize + OpenXmlSerializeTo {
+    fn inner_text<'a>(&'a self) -> Cow<'a, str>;
+}
+
+impl<T: OpenXmlLeafTextElement + OpenXmlElementInfo> OpenXmlElement for T {
+    fn tag(&self) -> &[u8] {
+        unimplemented!()
+    }
+
+    fn namespace_declarations(&self) -> Vec<Attribute> {
+        unreachable!()
+    }
+
+    fn add_namespace_declaration(&mut self, prefix: &str, uri: &str) {
+        unreachable!()
+    }
+
+    fn remove_namespace_declaration(&mut self, prefix: &str) {
+        unreachable!()
+    }
+
+    fn extended_attributes(&self) -> Vec<Attribute> {
+        unreachable!()
+    }
+
+    fn has_attributes(&self) -> bool {
+        unreachable!()
+    }
+
+    fn set_attribute(&mut self, attribute: Attribute) {
+        unreachable!()
+    }
+
+    fn remove_attribute(&mut self, local_name: &str, namespace_uri: &str) {
+        unreachable!()
+    }
+
+    fn clear_attributes(&mut self) {
+        unreachable!()
+    }
+
+    fn has_children(&self) -> bool {
+        false
+    }
+
+    fn write_children<W: Write>(&self, writer: W) -> Result<(), OoxmlError> {
+        unreachable!()
+    }
+
+    fn get_attribute(&self, name: &str) {
+        unreachable!()
+    }
+
+    fn write<W: Write>(&self, mut writer: W) -> Result<(), OoxmlError> {
+        write!(writer, "{}", self.inner_text())?;
+        Ok(())
+    }
+}
+
+/// Static information of an OpenXml element
+pub trait OpenXmlElementInfo {
+    /// XML tag name
+    fn tag_name() -> &'static str;
+
+    /// If the element have a tag name.
+    ///
+    /// Specially, plain text or cdata element does not have tag name.
+    fn have_tag_name() -> bool {
+        true
+    }
+
+    /// If the element can have namespace declartions.
+    fn can_have_namespace_declarations() -> bool {
+        true
+    }
+    /// If the element can have attributes.
+    fn can_have_attributes(&self) -> bool {
+        true
+    }
+    /// If the element can have children.
+    ///
+    /// Eg. plain text element cannot have children, so all children changes not works.
+    fn can_have_children(&self) -> bool {
+        true
+    }
+}
+pub trait OpenXmlElement: FromXml + ToXml + OpenXmlElementInfo {
     fn tag(&self) -> &[u8];
     fn namespace_declarations(&self) -> Vec<Attribute>;
     fn add_namespace_declaration(&mut self, prefix: &str, uri: &str);
@@ -84,10 +177,10 @@ pub trait OpenXmlElement: FromXml + ToXml {
     fn set_attribute(&mut self, attribute: Attribute);
     fn remove_attribute(&mut self, local_name: &str, namespace_uri: &str);
     fn clear_attributes(&mut self);
-    
+
     fn has_children(&self) -> bool;
     //type Children;
-    
+
     //fn append(&mut self, children: OpenXmlChild);
     //fn clear_children(&mut self);
     fn write_children<W: Write>(&self, writer: W) -> Result<(), OoxmlError>;
@@ -105,8 +198,8 @@ pub trait OpenXmlElement: FromXml + ToXml {
     fn write<W: Write>(&self, mut writer: W) -> Result<(), OoxmlError> {
         let mut xml = quick_xml::Writer::new(&mut writer);
         // 2. start types element
-        let tag = self.tag();
-        let mut elem = BytesStart::borrowed_name(tag);
+        let tag = Self::tag_name();
+        let mut elem = BytesStart::borrowed_name(tag.as_bytes());
         let attrs = self.extended_attributes();
         if !attrs.is_empty() {
             elem.extend_attributes(attrs);
@@ -119,7 +212,7 @@ pub trait OpenXmlElement: FromXml + ToXml {
         }
 
         // ends types element.
-        let end = BytesEnd::borrowed(tag);
+        let end = BytesEnd::borrowed(tag.as_bytes());
         xml.write_event(Event::End(end))?;
         Ok(())
     }

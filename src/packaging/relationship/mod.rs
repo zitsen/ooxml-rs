@@ -38,6 +38,18 @@ pub struct Relationship {
     r#type: String,
     target: String,
 }
+
+impl Relationship {
+    pub fn id(&self) -> &str {
+        &self.id
+    }
+    pub fn r#type(&self) -> &str {
+        &self.r#type
+    }
+    pub fn target(&self) -> &str {
+        &self.target
+    }
+}
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct Relationships {
     relationships: LinkedHashMap<String, Relationship>,
@@ -159,6 +171,10 @@ impl Relationships {
 
     pub fn add_relationship(&mut self, relationship: Relationship) {
         self.relationships.insert(relationship.id.clone(), relationship);
+    }
+
+    pub fn get_relationship_by_id(&self, id: &str) -> Option<&Relationship> {
+        self.relationships.get(id)
     }
 
     pub fn is_empty(&self) -> bool {

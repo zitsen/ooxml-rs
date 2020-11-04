@@ -107,7 +107,6 @@ fn variant_serde() {
     assert_eq!(xml, "<vt:lpwstr>text</vt:lpwstr>");
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
-    panic!();
 
     let v = Variant::VtVariant { value: Box::new(Variant::VtI4(2)) };
     //let v = Variant::VTVector(vec![v.clone(), v.clone()]);

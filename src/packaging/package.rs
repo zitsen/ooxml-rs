@@ -3,7 +3,7 @@ use crate::packaging::content_type::{ContentType, ContentTypes};
 use crate::packaging::custom_property::CustomProperties;
 use crate::packaging::part::OpenXmlPart;
 use crate::packaging::property::Properties;
-use crate::packaging::relationship::Relationships;
+pub use crate::packaging::relationship::Relationships;
 use crate::packaging::app_property::AppProperties;
 use crate::packaging::xml::*;
 
@@ -135,7 +135,12 @@ impl OpenXmlPackage {
     pub fn is_dirty(&self, uri: &str) -> bool {
         unimplemented!()
     }
-    pub fn get_parts() {}
+
+    /// Get OpenXML `Part` by uri.
+    pub fn get_part(&self, uri: &str) -> Option<&OpenXmlPart> {
+        self.parts.get(uri)
+    }
+
     pub fn create_part() {}
 
     pub fn flush() {}

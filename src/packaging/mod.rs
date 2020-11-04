@@ -1,11 +1,14 @@
-mod app_property;
-mod content_type;
-mod custom_property;
-mod element;
-mod package;
-mod part;
-mod property;
-mod relationship;
-mod variant;
-mod xml;
-mod zip;
+pub mod app_property;
+pub mod content_type;
+pub mod custom_property;
+pub mod element;
+pub mod package;
+pub mod part;
+pub mod property;
+pub mod relationship;
+pub mod variant;
+pub mod xml;
+pub mod zip;
+pub mod namespace;
+
+pub use package::OpenXmlPackage;

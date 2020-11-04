@@ -1,11 +1,11 @@
-mod error;
-mod xml;
+/// Error module
+pub mod error;
 
+/// The OpenXML Packaging Convetion implementations.
+pub mod packaging;
+
+/// Shared components
 mod drawing;
 mod math;
-mod packaging;
-mod presentation;
-mod spreadsheet;    
-mod wordprocessing;
 
-//use error::*;
+pub mod document;

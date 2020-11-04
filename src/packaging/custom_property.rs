@@ -20,6 +20,7 @@ pub const VT_NAMESPACE_ATTRIBUTE: &str = "xmlns:vt";
 pub const VT_NAMESPACE: &str =
     "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
 
+use crate::packaging::namespace::Namespaces;
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"), rename = "property")]
 pub struct CustomProperty {
@@ -53,6 +54,8 @@ fn custom_properties_de() {
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "Properties")]
 pub struct CustomProperties {
+    #[serde(flatten)]
+    namespaces: Namespaces,
     #[serde(rename = "property")]
     properties: Vec<CustomProperty>,
 }
@@ -102,18 +105,19 @@ impl CustomProperties {
         // 2. start types element
         let mut elem = BytesStart::borrowed_name(CUSTOM_PROPERTIES_TAG.as_bytes());
 
-        macro_rules! nsattr {
-            ($ns:ident) => {
-                paste::paste! {
-                    Attribute {
-                        key: [<$ns _NAMESPACE_ATTRIBUTE>].as_bytes(),
-                        value: [<$ns _NAMESPACE>].as_bytes().into(),
-                    }
-                }
-            };
-        }
+        // macro_rules! nsattr {
+        //     ($ns:ident) => {
+        //         paste::paste! {
+        //             Attribute {
+        //                 key: [<$ns _NAMESPACE_ATTRIBUTE>].as_bytes(),
+        //                 value: [<$ns _NAMESPACE>].as_bytes().into(),
+        //             }
+        //         }
+        //     };
+        // }
 
-        elem.extend_attributes(vec![nsattr!(CUSTOM_PROPERTIES), nsattr!(VT)]);
+        //elem.extend_attributes(vec![nsattr!(CUSTOM_PROPERTIES), nsattr!(VT)]);
+        elem.extend_attributes(self.namespaces.to_xml_attributes());
         xml.write_event(Event::Start(elem))?;
         quick_xml::se::to_writer(xml.inner(), &self.properties);
 

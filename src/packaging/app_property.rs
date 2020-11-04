@@ -9,6 +9,8 @@ use linked_hash_map::LinkedHashMap;
 use std::io::prelude::*;
 use std::{borrow::Cow, fmt, fs::File, path::Path};
 
+use super::xml::OpenXmlFromDeserialize;
+
 pub const APP_PROPERTIES_URI: &str = "docProps/app.xml";
 
 pub const APP_PROPERTIES_TAG: &str = "Properties";
@@ -21,6 +23,9 @@ pub const APP_PROPERTY_TAG: &str = "property";
 pub const VT_NAMESPACE_ATTRIBUTE: &str = "xmlns:vt";
 pub const VT_NAMESPACE: &str =
     "http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes";
+
+    #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Application(String);
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct TitlesOfParts {
@@ -65,7 +70,7 @@ pub struct AppProperties {
     nlms: String,
     #[serde(rename = "xmlns:vt")]
     nlms_vt: String,
-    application: Option<String>,
+    application: Option<Application>,
     heading_pairs: Option<HeadingPairs>,
     titles_of_parts: Option<TitlesOfParts>,
     lines: Option<String>,
@@ -76,6 +81,8 @@ pub struct AppProperties {
     manager: Option<String>,
     pages: Option<String>,
 }
+
+impl OpenXmlFromDeserialize for AppProperties {}
 
 #[test]
 fn serde() {
