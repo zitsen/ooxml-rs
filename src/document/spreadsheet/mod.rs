@@ -8,8 +8,8 @@ use derivative::Derivative;
 
 use crate::{
     error::Result,
-    packaging::package::{OpenXmlPackage, Relationships},
     packaging::element::*,
+    packaging::package::{OpenXmlPackage, Relationships},
 };
 
 mod cell;

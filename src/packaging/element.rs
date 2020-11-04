@@ -161,7 +161,6 @@ pub trait OpenXmlSerialize: OpenXmlElementInfo {
 }
 pub trait OpenXmlSerializeDefault: serde::ser::Serialize {}
 
-
 pub trait OpenXmlDeserialize: Sized {
     /// Parse from an xml stream reader
     fn from_xml_reader<R: BufRead>(reader: R) -> Result<Self, OoxmlError>;

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::packaging::namespace::Namespaces;
 use crate::packaging::element::*;
+use crate::packaging::namespace::Namespaces;
 
 use quick_xml::events::attributes::Attribute;
 use serde::{Deserialize, Serialize};

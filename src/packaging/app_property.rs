@@ -1,7 +1,7 @@
 use std::{borrow::Cow, io::Write};
 
-use super::namespace::Namespaces;
 use super::element::*;
+use super::namespace::Namespaces;
 use super::variant::*;
 
 use quick_xml::events::attributes::Attribute;

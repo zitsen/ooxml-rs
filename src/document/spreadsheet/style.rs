@@ -1,5 +1,5 @@
-use crate::packaging::namespace::Namespaces;
 use crate::packaging::element::*;
+use crate::packaging::namespace::Namespaces;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -28,7 +28,6 @@ pub struct NumberFormats {
     num_fmt: Vec<NumberFormat>,
 }
 impl OpenXmlDeserializeDefault for NumberFormats {}
-
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "numFmt")]

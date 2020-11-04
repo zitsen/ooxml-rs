@@ -14,8 +14,8 @@ pub const SHARED_STRINGS_TAG: &str = "sst";
 
 pub const SHARED_STRING_TAG: &str = "si";
 
-use crate::packaging::namespace::Namespaces;
 use crate::packaging::element::*;
+use crate::packaging::namespace::Namespaces;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"), rename = "t")]

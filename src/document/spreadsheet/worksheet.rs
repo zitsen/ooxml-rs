@@ -1,10 +1,10 @@
 use super::cell::CellValue;
-use crate::packaging::namespace::Namespaces;
 use crate::packaging::element::*;
+use crate::packaging::namespace::Namespaces;
 
-use std::borrow::Cow;
 use quick_xml::events::attributes::Attribute;
 use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "sheetPr")]
@@ -114,8 +114,6 @@ impl OpenXmlElementInfo for WorksheetPart {
 }
 
 impl OpenXmlDeserializeDefault for WorksheetPart {}
-
-
 
 impl OpenXmlSerialize for WorksheetPart {
     fn namespaces(&self) -> Option<Cow<Namespaces>> {

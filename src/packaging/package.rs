@@ -2,10 +2,10 @@ use crate::error::OoxmlError;
 use crate::packaging::app_property::AppProperties;
 use crate::packaging::content_type::{ContentType, ContentTypes};
 use crate::packaging::custom_property::CustomProperties;
+use crate::packaging::element::*;
 use crate::packaging::part::OpenXmlPart;
 use crate::packaging::property::Properties;
 pub use crate::packaging::relationship::Relationships;
-use crate::packaging::element::*;
 
 use std::fs::File;
 use std::io::prelude::*;
