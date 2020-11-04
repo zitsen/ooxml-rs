@@ -1,4 +1,3 @@
-
 //! There's some marker trait and helper trait for XML (de)serializing.
 //!
 use std::io::BufReader;
@@ -93,12 +92,9 @@ pub trait OpenXmlElementExt: OpenXmlElementInfo {
     fn namespaces(&self) -> Option<Cow<Namespaces>>;
 
     /// Serialize to writer
-    fn write_inner<W: Write>(&self, writer: W)  -> crate::error::Result<()>;
+    fn write_inner<W: Write>(&self, writer: W) -> crate::error::Result<()>;
 
-    fn write_outter<W: Write>(
-        &self,
-        writer: W,
-    ) -> crate::error::Result<()> {
+    fn write_outter<W: Write>(&self, writer: W) -> crate::error::Result<()> {
         let mut writer = quick_xml::Writer::new(writer);
         use quick_xml::events::*;
 
@@ -124,4 +120,3 @@ pub trait OpenXmlElementExt: OpenXmlElementInfo {
         }
     }
 }
-

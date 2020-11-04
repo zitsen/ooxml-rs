@@ -1,13 +1,11 @@
 use crate::error::OoxmlError;
+use crate::packaging::app_property::AppProperties;
 use crate::packaging::content_type::{ContentType, ContentTypes};
 use crate::packaging::custom_property::CustomProperties;
 use crate::packaging::part::OpenXmlPart;
 use crate::packaging::property::Properties;
 pub use crate::packaging::relationship::Relationships;
-use crate::packaging::app_property::AppProperties;
 use crate::packaging::xml::*;
-
-
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -17,11 +15,9 @@ use zip::ZipArchive;
 
 use linked_hash_map::LinkedHashMap;
 
-
-
+use crate::packaging::app_property::APP_PROPERTIES_URI;
 use crate::packaging::content_type::CONTENT_TYPES_FILE;
 use crate::packaging::custom_property::CUSTOM_PROPERTIES_URI;
-use crate::packaging::app_property::APP_PROPERTIES_URI;
 use crate::packaging::property::CORE_PROPERTIES_URI;
 use crate::packaging::relationship::RELATIONSHIPS_FILE;
 

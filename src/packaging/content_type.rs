@@ -156,9 +156,7 @@ impl ContentTypes {
     /// follow OpenXML SDK function definitions, but not implemented.
     pub fn add_content_type() {}
     pub fn get_content_type() {}
-    pub fn delete_content_type(&mut self, _content_type: &ContentType) {
-
-    }
+    pub fn delete_content_type(&mut self, _content_type: &ContentType) {}
 
     /// Save to file path.
     pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {

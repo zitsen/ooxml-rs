@@ -1,5 +1,5 @@
 #[test]
-fn test_zip_writer() -> Result<(), crate::error::OoxmlError>{
+fn test_zip_writer() -> Result<(), crate::error::OoxmlError> {
     use std::io::Write;
 
     // We use a buffer here, though you'd normally use a `File`

@@ -1,6 +1,3 @@
-
-
-
 use crate::packaging::namespace::Namespaces;
 use crate::packaging::xml::*;
 use serde::{Deserialize, Serialize};
@@ -187,7 +184,9 @@ impl StylesPart {
 
     /// Get cell style by id, 0-based.
     pub fn get_cell_style(&self, id: usize) -> Option<&CellStyle> {
-        self.cell_styles.as_ref().and_then(|cs| cs.cell_style.get(id))
+        self.cell_styles
+            .as_ref()
+            .and_then(|cs| cs.cell_style.get(id))
     }
     /// Get cell style xf by id, 0-based.
     pub fn get_xf(&self, id: usize) -> Option<&Xf> {
@@ -195,7 +194,9 @@ impl StylesPart {
     }
     /// Get cell style by id, 0-based.
     pub fn get_number_format(&self, id: usize) -> Option<&NumberFormat> {
-        self.num_fmts.as_ref().and_then(|inner| inner.num_fmt.get(id))
+        self.num_fmts
+            .as_ref()
+            .and_then(|inner| inner.num_fmt.get(id))
     }
 }
 

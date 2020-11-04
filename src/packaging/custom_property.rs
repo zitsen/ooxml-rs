@@ -91,7 +91,7 @@ impl CustomProperties {
     /// Write to an writer
     pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
         let mut xml = quick_xml::Writer::new(writer);
-        
+
         use quick_xml::events::*;
 
         // 1. write decl

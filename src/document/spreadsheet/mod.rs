@@ -22,15 +22,13 @@ mod style;
 mod workbook;
 mod worksheet;
 
-
 use self::document_type::SpreadsheetDocumentType;
 
-
+use self::cell::CellValue;
 use self::shared_string::SharedStringsPart;
 use self::style::StylesPart;
 use self::workbook::WorkbookPart;
 use self::worksheet::WorksheetPart;
-use self::cell::CellValue;
 
 #[derive(Derivative, Clone, Default)]
 #[derivative(Debug)]
@@ -45,7 +43,6 @@ pub struct SpreadsheetParts {
     // pub media: Vec<MediaPart>,
     // pub drawings: Vec<DrawingPart>,
     // pub charts: Vec<ChartPart>,
-
     /// Dict for worksheets, key is uri, value is worksheet part.
     pub worksheets: linked_hash_map::LinkedHashMap<String, WorksheetPart>,
 }
@@ -125,11 +122,10 @@ pub struct SpreadsheetDocument {
     workbook: Workbook,
 }
 
-
 #[derive(Derivative)]
 #[derivative(Debug, Clone)]
 struct Row {
-    cells: Vec<CellValue>
+    cells: Vec<CellValue>,
 }
 
 #[derive(Derivative)]

@@ -45,7 +45,7 @@ impl<'a, T: Clone + ToCellValue> ToCellValue for &'a T {
 }
 macro_rules! impl_to_cell_value {
     ($ty:ty, $target:ident) => {
-        paste::paste!{
+        paste::paste! {
             impl ToCellValue for $ty {
                 fn to_cell_value(self) -> CellValue {
                     CellValue::[<$target>](self as _)
@@ -54,7 +54,6 @@ macro_rules! impl_to_cell_value {
         }
     };
 }
-
 
 impl_to_cell_value!(u8, Byte);
 impl_to_cell_value!(i64, Int);

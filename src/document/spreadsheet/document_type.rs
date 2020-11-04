@@ -1,8 +1,5 @@
-
-
 #[derive(Debug, Clone, Copy)]
-pub enum SpreadsheetDocumentType
-{
+pub enum SpreadsheetDocumentType {
     /// Excel Workbook (*.xlsx).
     Workbook,
     /// Excel Template (*.xltx).
@@ -21,10 +18,14 @@ impl Default for SpreadsheetDocumentType {
     }
 }
 
-const WORKBOOK_CONTENT_TYPE: &str = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml";
-const TEMPLATE_CONTENT_TYPE: &str = "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml";
-const MACRO_ENABLED_WORKBOOK_CONTENT_TYPE: &str = "application/vnd.ms-excel.sheet.macroEnabled.main+xml";
-const MACRO_ENABLED_TEMPLATE_CONTENT_TYPE: &str = "application/vnd.ms-excel.template.macroEnabled.main+xml";
+const WORKBOOK_CONTENT_TYPE: &str =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml";
+const TEMPLATE_CONTENT_TYPE: &str =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.template.main+xml";
+const MACRO_ENABLED_WORKBOOK_CONTENT_TYPE: &str =
+    "application/vnd.ms-excel.sheet.macroEnabled.main+xml";
+const MACRO_ENABLED_TEMPLATE_CONTENT_TYPE: &str =
+    "application/vnd.ms-excel.template.macroEnabled.main+xml";
 const ADDIN_CONTENT_TYPE: &str = "application/vnd.ms-excel.addin.macroEnabled.main+xml";
 impl SpreadsheetDocumentType {
     pub fn content_type(&self) -> &'static str {
@@ -45,6 +46,5 @@ impl SpreadsheetDocumentType {
             ADDIN_CONTENT_TYPE => SpreadsheetDocumentType::AddIn,
             _ => panic!("unsupported spread sheet document content type"),
         }
-
     }
 }

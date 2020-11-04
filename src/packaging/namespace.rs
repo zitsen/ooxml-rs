@@ -9,11 +9,7 @@ impl Namespaces {
         ns.set_default_namespace(uri);
         ns
     }
-    pub fn add_namespace<S1: Into<String>, S2: Into<String>>(
-        &mut self,
-        decl: S1,
-        uri: S2,
-    ) {
+    pub fn add_namespace<S1: Into<String>, S2: Into<String>>(&mut self, decl: S1, uri: S2) {
         self.0.insert(decl.into(), uri.into());
     }
     pub fn remove_namespace(&mut self, decl: &str) {
@@ -28,17 +24,18 @@ use quick_xml::events::attributes::Attribute;
 
 impl Namespaces {
     pub fn to_xml_attributes(&self) -> Vec<Attribute> {
-        self.0.iter().map(|(k, v)| {
-            Attribute {
+        self.0
+            .iter()
+            .map(|(k, v)| Attribute {
                 key: k.as_bytes(),
                 value: v.as_bytes().into(),
-            }
-        }).collect()
+            })
+            .collect()
     }
 }
 
+use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
 use std::fmt;
-use serde::de::{Visitor, MapAccess, Deserialize, Deserializer};
 struct ContentTypesVisitor;
 
 impl<'de> Visitor<'de> for ContentTypesVisitor {
@@ -83,7 +80,7 @@ impl<'de> Deserialize<'de> for Namespaces {
     }
 }
 
-use serde::ser::{Serialize, Serializer, SerializeMap};
+use serde::ser::{Serialize, SerializeMap, Serializer};
 
 impl Serialize for Namespaces {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>

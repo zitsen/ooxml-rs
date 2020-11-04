@@ -10,7 +10,7 @@ use std::{fmt, fs::File, path::Path};
 pub const SHARED_STRINGS_TAG: &str = "sst";
 // pub const SHARED_STRINGS_NAMESPACE_ATTRIBUTE: &str = "xmlns";
 // pub const SHARED_STRINGS_NAMESPACE: &str =
-    // "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+// "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
 
 pub const SHARED_STRING_TAG: &str = "si";
 
@@ -67,7 +67,7 @@ impl OpenXmlElementInfo for SharedStringsPart {
     }
 }
 
-impl OpenXmlFromDeserialize for SharedStringsPart { }
+impl OpenXmlFromDeserialize for SharedStringsPart {}
 
 impl fmt::Display for SharedStringsPart {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -113,7 +113,7 @@ impl SharedStringsPart {
 
         // 2. start types element
         let mut elem = BytesStart::borrowed_name(SHARED_STRINGS_TAG.as_bytes());
-        
+
         //elem.extend_attributes(vec![nsattr!(SHARED_STRINGS), nsattr!(VT)]);
         elem.extend_attributes(self.namespaces.to_xml_attributes());
         elem.extend_attributes(vec![
@@ -124,7 +124,7 @@ impl SharedStringsPart {
             Attribute {
                 key: b"uniqueCount",
                 value: format!("{}", self.unique_count).as_bytes().into(),
-            }
+            },
         ]);
         xml.write_event(Event::Start(elem))?;
         for si in &self.strings {
@@ -134,7 +134,6 @@ impl SharedStringsPart {
             let end = BytesEnd::borrowed(SHARED_STRING_TAG.as_bytes());
             xml.write_event(Event::End(end))?;
         }
-        
 
         // // ends types element.
         let end = BytesEnd::borrowed(SHARED_STRINGS_TAG.as_bytes());

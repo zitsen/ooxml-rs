@@ -1,14 +1,15 @@
-use crate::packaging::content_type::ContentType;
 use crate::error::OoxmlError;
+use crate::packaging::content_type::ContentType;
 
 use serde::{Deserialize, Serialize};
 
-use std::{fmt, fs::File, path::Path};
 use std::io::prelude::*;
+use std::{fmt, fs::File, path::Path};
 
 pub type DateTime = String;
 pub const CORE_PROPERTIES_URI: &str = "docProps/core.xml";
-pub const CORE_PROPERTIES_NAMESPACE: &str = "http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
+pub const CORE_PROPERTIES_NAMESPACE: &str =
+    "http://schemas.openxmlformats.org/package/2006/metadata/core-properties";
 pub const DC_NAMESPACE: &str = "http://purl.org/dc/elements/1.1/";
 pub const DCTERMS_NAMESPACE: &str = "http://purl.org/dc/terms/";
 pub const DCMITYPE_NAMESPACE: &str = "http://purl.org/dc/dcmitype/";
@@ -71,59 +72,59 @@ impl fmt::Display for Properties {
 }
 
 impl Properties {
-        /// Parse content types data from an xml reader.
-        pub fn parse_from_xml_reader<R: BufRead>(reader: R) -> Self {
-            quick_xml::de::from_reader(reader).unwrap()
-        }
-    
-        /// Parse content types data from an xml str.
-        pub fn parse_from_xml_str(reader: &str) -> Self {
-            quick_xml::de::from_str(reader).unwrap()
-        }
-    
-        /// Save to file path.
-        pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
-            let file = File::create(path)?;
-            self.write(file)
-        }
-    
-        /// Write to an writer
-        pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
-            let mut xml = quick_xml::Writer::new( writer);
-            use quick_xml::events::attributes::Attribute;
-            use quick_xml::events::*;
-    
-            // 1. write decl
-            xml.write_event(Event::Decl(BytesDecl::new(
-                b"1.0",
-                Some(b"UTF-8"),
-                Some(b"yes"),
-            )))?;
-    
-            // 2. start types element
-            let mut elem = BytesStart::borrowed_name(CORE_PROPERTIES_TAG.as_bytes());
-            
-            macro_rules! nsattr {
-                ($ns:ident) => {
-                    paste::paste! {
-                        Attribute {
-                            key: [<$ns _NAMESPACE_ATTRIBUTE>].as_bytes(),
-                            value: [<$ns _NAMESPACE>].as_bytes().into(),
-                        }
+    /// Parse content types data from an xml reader.
+    pub fn parse_from_xml_reader<R: BufRead>(reader: R) -> Self {
+        quick_xml::de::from_reader(reader).unwrap()
+    }
+
+    /// Parse content types data from an xml str.
+    pub fn parse_from_xml_str(reader: &str) -> Self {
+        quick_xml::de::from_str(reader).unwrap()
+    }
+
+    /// Save to file path.
+    pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<(), OoxmlError> {
+        let file = File::create(path)?;
+        self.write(file)
+    }
+
+    /// Write to an writer
+    pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
+        let mut xml = quick_xml::Writer::new(writer);
+        use quick_xml::events::attributes::Attribute;
+        use quick_xml::events::*;
+
+        // 1. write decl
+        xml.write_event(Event::Decl(BytesDecl::new(
+            b"1.0",
+            Some(b"UTF-8"),
+            Some(b"yes"),
+        )))?;
+
+        // 2. start types element
+        let mut elem = BytesStart::borrowed_name(CORE_PROPERTIES_TAG.as_bytes());
+
+        macro_rules! nsattr {
+            ($ns:ident) => {
+                paste::paste! {
+                    Attribute {
+                        key: [<$ns _NAMESPACE_ATTRIBUTE>].as_bytes(),
+                        value: [<$ns _NAMESPACE>].as_bytes().into(),
                     }
                 }
-            }
+            };
+        }
 
-            elem.extend_attributes(vec![
-                nsattr!(CORE_PROPERTIES),
-                nsattr!(DC),
-                nsattr!(DCTERMS),
-                nsattr!(DCMITYPE),
-                nsattr!(XSI),
-            ]);
-            xml.write_event(Event::Start(elem))?;
+        elem.extend_attributes(vec![
+            nsattr!(CORE_PROPERTIES),
+            nsattr!(DC),
+            nsattr!(DCTERMS),
+            nsattr!(DCMITYPE),
+            nsattr!(XSI),
+        ]);
+        xml.write_event(Event::Start(elem))?;
 
-            macro_rules! field {
+        macro_rules! field {
                 ($field:ident) => {
                     paste::paste! {
                         if let Some(field) = &self.$field {
@@ -157,31 +158,31 @@ impl Properties {
                     }
                 }
             }
-            // FIXME(@zitsen): add more field to xml.
-            field!(created, "term");
-            field!(creator);
-            field!(last_modified_by);
-            field!(modified, "term");
-            field!(revision);
+        // FIXME(@zitsen): add more field to xml.
+        field!(created, "term");
+        field!(creator);
+        field!(last_modified_by);
+        field!(modified, "term");
+        field!(revision);
 
-            // bellow may not right
-            field!(category);
-            field!(content_status);
-            field!(content_type);
-            field!(description);
-            field!(identifier);
-            field!(keywords);
-            field!(language);
-            field!(last_printed);
-            field!(subject);
-            field!(title);
-            field!(version);
-    
-            // ends types element.
-            let end = BytesEnd::borrowed(CORE_PROPERTIES_TAG.as_bytes());
-            xml.write_event(Event::End(end))?;
-            Ok(())
-        }
+        // bellow may not right
+        field!(category);
+        field!(content_status);
+        field!(content_type);
+        field!(description);
+        field!(identifier);
+        field!(keywords);
+        field!(language);
+        field!(last_printed);
+        field!(subject);
+        field!(title);
+        field!(version);
+
+        // ends types element.
+        let end = BytesEnd::borrowed(CORE_PROPERTIES_TAG.as_bytes());
+        xml.write_event(Event::End(end))?;
+        Ok(())
+    }
 }
 #[test]
 fn test_de() {

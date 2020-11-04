@@ -1,5 +1,3 @@
-
-
 pub struct ReferenceRelationship {
     //container: Rc<Cell<crate::packaging::part::Container>>,
     id: String,

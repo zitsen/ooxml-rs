@@ -60,7 +60,7 @@ fn serde_vt_variant() {
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 
-    let v = Variant::VtVariant{ value: Box::new(v) };
+    let v = Variant::VtVariant { value: Box::new(v) };
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
     assert_eq!(xml, "<vt:variant><vt:lpwstr>text</vt:lpwstr></vt:variant>");
@@ -76,10 +76,17 @@ fn serde_vt_vector() {
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 
-    let v = Variant::VtVector{ size: 1, base_type: "lpwstr".into(), variants: vec![v] };
+    let v = Variant::VtVector {
+        size: 1,
+        base_type: "lpwstr".into(),
+        variants: vec![v],
+    };
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
-    assert_eq!(xml, r#"<vt:vector size="1" baseType="lpwstr"><vt:lpwstr>text</vt:lpwstr></vt:vector>"#);
+    assert_eq!(
+        xml,
+        r#"<vt:vector size="1" baseType="lpwstr"><vt:lpwstr>text</vt:lpwstr></vt:vector>"#
+    );
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 }
@@ -93,22 +100,24 @@ fn variant_serde() {
     assert_eq!(format!("{}", xml), "<vt:lpwstr>text</vt:lpwstr>");
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
-    
-    let v = Variant::VtVariant{ value: Box::new(v)};
+
+    let v = Variant::VtVariant { value: Box::new(v) };
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
     assert_eq!(xml, "<vt:variant><vt:lpwstr>text</vt:lpwstr></vt:variant>");
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 
-    let v =  Variant::VtLpwstr("text".into());
+    let v = Variant::VtLpwstr("text".into());
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
     assert_eq!(xml, "<vt:lpwstr>text</vt:lpwstr>");
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 
-    let v = Variant::VtVariant { value: Box::new(Variant::VtI4(2)) };
+    let v = Variant::VtVariant {
+        value: Box::new(Variant::VtI4(2)),
+    };
     //let v = Variant::VTVector(vec![v.clone(), v.clone()]);
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
@@ -116,11 +125,17 @@ fn variant_serde() {
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
 
-    let v = Variant::VtVector { size: 2, base_type: "variant".into(), variants: vec![v]};
+    let v = Variant::VtVector {
+        size: 2,
+        base_type: "variant".into(),
+        variants: vec![v],
+    };
     let xml = quick_xml::se::to_string(&v).unwrap();
     println!("{}", xml);
-    assert_eq!(xml, r#"<vt:vector size="2" baseType="variant"><vt:variant><vt:i4>2</vt:i4></vt:variant></vt:vector>"#);
+    assert_eq!(
+        xml,
+        r#"<vt:vector size="2" baseType="variant"><vt:variant><vt:i4>2</vt:i4></vt:variant></vt:vector>"#
+    );
     let vd = quick_xml::de::from_str(&xml).unwrap();
     assert_eq!(v, vd);
-
 }

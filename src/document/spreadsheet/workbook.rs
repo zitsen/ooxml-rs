@@ -1,7 +1,7 @@
 use crate::packaging::namespace::Namespaces;
 use crate::packaging::xml::*;
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "fileVersion")]
@@ -14,8 +14,7 @@ pub struct FileVersion {
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "workbookPr")]
-pub struct WorkbookPr {
-}
+pub struct WorkbookPr {}
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "workbookView")]
@@ -75,7 +74,7 @@ impl OpenXmlElementInfo for WorkbookPart {
     }
 }
 
-impl OpenXmlFromDeserialize for WorkbookPart { }
+impl OpenXmlFromDeserialize for WorkbookPart {}
 
 impl ToXml for WorkbookPart {
     fn write<W: std::io::Write>(&self, writer: W) -> Result<(), crate::error::OoxmlError> {
@@ -104,13 +103,13 @@ impl ToXml for WorkbookPart {
         let end = BytesEnd::borrowed(Self::tag_name().as_bytes());
         xml.write_event(Event::End(end))?;
         Ok(())
-
     }
 }
 
 #[test]
 fn serde() {
-    let workbook = WorkbookPart::from_xml_file("examples/simple-spreadsheet/xl/workbook.xml").unwrap();
+    let workbook =
+        WorkbookPart::from_xml_file("examples/simple-spreadsheet/xl/workbook.xml").unwrap();
     println!("{:?}", workbook);
     let str = workbook.to_xml_string().unwrap();
     println!("{}", str);
@@ -120,5 +119,3 @@ fn serde() {
     println!("{:?}", workbook2);
     assert_eq!(workbook, workbook2);
 }
-
-

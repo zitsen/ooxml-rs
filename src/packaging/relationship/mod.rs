@@ -22,11 +22,11 @@ use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
 
 use crate::error::OoxmlError;
 
-
 pub const RELATIONSHIPS_FILE: &'static str = "_rels/.rels";
 
 const XMLNS_ATTRIBUTE_NAME: &'static str = "xmlns";
-const RELATIONSHIP_NAMESPACE_URI: &'static str = "http://schemas.openxmlformats.org/package/2006/relationships";
+const RELATIONSHIP_NAMESPACE_URI: &'static str =
+    "http://schemas.openxmlformats.org/package/2006/relationships";
 // const XMLNS_R_ATTRIBUTE_NAME: &'static str = "xmlns:r";
 const RELATIONSHIP_TAG_NAME: &'static str = "Relationship";
 const RELATIONSHIPS_TAG_NAME: &'static str = "Relationships";
@@ -138,7 +138,7 @@ impl Relationships {
 
     /// Write to an writer
     pub fn write<W: std::io::Write>(&self, writer: W) -> Result<(), OoxmlError> {
-        let mut xml = quick_xml::Writer::new( writer);
+        let mut xml = quick_xml::Writer::new(writer);
         use quick_xml::events::attributes::Attribute;
         use quick_xml::events::*;
 
@@ -170,7 +170,8 @@ impl Relationships {
     }
 
     pub fn add_relationship(&mut self, relationship: Relationship) {
-        self.relationships.insert(relationship.id.clone(), relationship);
+        self.relationships
+            .insert(relationship.id.clone(), relationship);
     }
 
     pub fn get_relationship_by_id(&self, id: &str) -> Option<&Relationship> {
