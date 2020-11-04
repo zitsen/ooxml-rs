@@ -1,7 +1,9 @@
-# OOXML - Office Open XML reader and writer
+# OOXML - Office OpenXML parser in Rust
 
-**This crate is started as a private-purposed project with limited knownledge of Office Open XML. Never use it in production!!!**
-**本项目只作为学习使用，不包含任何开发承诺，不可用于生产环境！！！！**
+**The source code is in my private github project https://github.com/zitsen/ooxml-rs . I'm glad to add you as a member of the project when I have your github username.**
+
+This crate is started as a private-purposed project with limited knownledge of Office Open XML. Never use it in production!!!
+本项目只作为学习使用，不包含任何开发承诺，不可用于生产环境！！！！
 
 > Office Open XML，为由Microsoft开发的一种以XML为基础并以ZIP格式压缩的电子文件规范，支持文件、表格、备忘录、幻灯片等文件格式。
 
