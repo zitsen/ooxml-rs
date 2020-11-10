@@ -52,7 +52,7 @@ pub struct Sheets {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "calcPr")]
 pub struct CalcPr {
-    calc_id: String,
+    calc_id: Option<String>,
 }
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

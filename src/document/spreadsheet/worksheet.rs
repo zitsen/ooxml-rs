@@ -13,9 +13,22 @@ pub struct SheetPr {}
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "sheetView")]
 pub struct SheetView {
-    tab_selected: Option<usize>,
+    tab_selected: Option<String>,
     workbook_view_id: Option<usize>,
     selection: Option<Selection>,
+    show_formulas: Option<bool>,
+    show_grid_lines: Option<bool>,
+    show_row_col_headers: Option<bool>,
+    show_zeros: Option<bool>,
+    right_to_left: Option<bool>,
+    show_outline_symbols: Option<bool>,
+    default_grid_color: Option<String>,
+    view: Option<String>,
+    top_left_cell: Option<String>,
+    color_id: Option<usize>,
+    zoom_scale: Option<String>,
+    zoom_scale_normal: Option<String>,
+    zoom_scale_page_layout_view: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -27,7 +40,7 @@ pub struct SheetViews {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "calcPr")]
 pub struct CalcPr {
-    calc_id: String,
+    calc_id: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -107,20 +120,38 @@ impl SheetCol {
         CellValue::String(self.v.to_string())
     }
     pub fn cell_type(&self) -> CellType {
-        if let Some(t) = self.t.as_ref() {
-            CellType::Shared(self.v.parse().expect("sharedString id not valid"))
-        } else if let Some(s) = self.s {
-            CellType::Styled(s)
-        } else {
-            CellType::Raw
+        match (self.t.as_ref(), self.s.as_ref()) {
+            (None, None) => CellType::Raw,
+            (Some(t), None) => match t {
+                s if s == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+                n if n == "n" => CellType::Number,
+                t => unimplemented!("cell type not supported: {}" , t),
+            }
+            (None, Some(s)) => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+            (Some(t), Some(s)) => match t {
+                t if t == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+                t if t == "n" => CellType::StyledNumber(*s),
+                t => unimplemented!("cell type not supported: {}" , t),
+            }
         }
+        // if let Some(t) = self.t.as_ref() {
+        //     match t {
+        //         s if s == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+        //         n if n == "n" => CellType::Number,
+        //         t => unimplemented!("cell type not supported: {}" , t),
+        //     }
+        // } else if let Some(s) = self.s {
+        //     CellType::Styled(s)
+        // } else {
+        //     CellType::Raw
+        // }
     }
 }
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename = "row")]
 pub struct SheetRow {
     pub r: usize,
-    pub spans: String,
+    pub spans: Option<String>,
     #[serde(rename = "c")]
     pub cols: Vec<SheetCol>,
 }

@@ -22,9 +22,7 @@ mod style;
 mod workbook;
 mod worksheet;
 
-use self::{
-    document_type::SpreadsheetDocumentType, style::CellStyleComponent, worksheet::SheetCol,
-};
+use self::{document_type::SpreadsheetDocumentType, style::{CellFormatComponent, CellStyleComponent}, worksheet::SheetCol};
 
 use self::cell::CellValue;
 use self::shared_string::SharedStringsPart;
@@ -92,6 +90,9 @@ impl SpreadsheetParts {
 
     pub fn get_cell_style<'a>(&'a self, id: usize) -> Option<CellStyleComponent<'a>> {
         self.styles.get_cell_style_component(id)
+    }
+    pub fn get_cell_format<'a>(&'a self, id: usize) -> Option<CellFormatComponent<'a>> {
+        self.styles.get_cell_format_component(id)
     }
     pub fn get_worksheet_part<T: AsRef<str>>(&self, uri: T) -> Option<&WorksheetPart> {
         self.worksheets.get(uri.as_ref())
@@ -171,30 +172,75 @@ impl Worksheet {
     /// Format a cell's raw value with given cell style id.
     pub fn format_cell_with(&self, raw: &str, style_id: usize) -> Option<String> {
         let parts = self.parts.as_ref().borrow();
-        let cs = parts.get_cell_style(style_id);
+        let cs = parts.get_cell_format(style_id);
         let cs = cs.unwrap();
+        // if !cs.apply_number_format() {
+            // let font = dbg!(cs.font());
+            // let fill = dbg!(cs.fill());
+        // }
         let nf = cs.number_format();
+        if nf.is_none() {
+            dbg!(raw, style_id);
+            // dbg!(cs.xf());
+            return Some(raw.to_string());
+        }
         let nf = nf.unwrap();
         let code = nf.code.as_str();
-        let s = match code {
-            "yyyy/m/d;@" => {
-                // Excel stores dates as sequential serial numbers so that they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
-                // source: https://support.office.com/en-us/article/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252
+        //println!("code: {}", code);
 
-                // Here's calamine as_date()
-                //let days = raw.parse().expect("date time string") - 25569;
-                //let secs = days * 86400;
-                //chrono::NaiveDateTime::from_timestamp_opt(secs, 0);
-
-                // use 1899.12.30 instead of 1900.1.1 to fix bug in excel date.
-                //let d1900 = chrono::NaiveDate::from_ymd(1900, 1, 1);
-                let d1900 = chrono::NaiveDate::from_ymd(1899, 12, 30);
-                //println!("{}", d1900);
-                let d3 =
-                    d1900 + chrono::Duration::days(raw.parse().expect("not a valid date string"));
-                format!("{}", d3)
+        fn parse_datetime(raw: &str) -> Option<chrono::NaiveDateTime> {
+            if let Ok(days) = raw.parse::<i64>() {
+                let days = days - 25569;
+                let secs = days * 86400;
+                chrono::NaiveDateTime::from_timestamp_opt(secs, 0)
+            } else if let Ok(datetime) = raw.parse::<f64>() {
+                let unix_days = datetime - 25569.;
+                let unix_secs = unix_days * 86400.;
+                let secs = unix_secs.trunc() as i64;
+                let nsecs = (unix_secs.fract().abs() * 1e9) as u32;
+                chrono::NaiveDateTime::from_timestamp_opt(secs, nsecs)
+            } else {
+                None
             }
-            _ => unimplemented!(),
+        }
+        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d|h|ss|a{2,5}").unwrap();
+
+        let datetime_replaces = vec![
+            (regex::Regex::new(":mm").unwrap(), ":%M"),
+            (regex::Regex::new("mm:").unwrap(), "%M:"),
+            (regex::Regex::new("mm").unwrap(), "%m"),
+            (regex::Regex::new("yyyy+").unwrap(), "%Y"),
+            (regex::Regex::new("yy+").unwrap(), "%y"),
+            (regex::Regex::new("mmmm+").unwrap(), "%B"),
+            (regex::Regex::new("mmm").unwrap(), "%b"),
+            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%m"),
+            (regex::Regex::new("d+").unwrap(), "%d"),
+            (regex::Regex::new("a{4,}").unwrap(), "%A"),
+            (regex::Regex::new("a{3}").unwrap(), "%a"),
+            (regex::Regex::new("a{2}").unwrap(), "%w"),
+            (regex::Regex::new("h").unwrap(), "%H"),
+            (regex::Regex::new("ss").unwrap(), "%S"),
+            (regex::Regex::new("\\\\").unwrap(), ""),
+        ];
+        let s = match code {
+            s if s == "General" => {
+                raw.to_string()
+            }
+            format if datetime_re.is_match(format) | format.ends_with(";@") => {
+                // dbg!(&format);
+                let format = format.trim_end_matches(";@");
+                let datetime = parse_datetime(raw).unwrap();
+
+                let format = datetime_replaces
+                    .iter()
+                    .fold(snailquote::unescape(format).unwrap(), |f, (re, s)| {
+                        re.replace_all(&f, *s).to_string()
+                    });
+                // dbg!(&format);
+                format!("{}", datetime.format(&format))
+
+            }
+            s => unimplemented!("unimplemented format support: {}", s),
         };
         Some(s)
     }
@@ -275,6 +321,15 @@ impl<'a> Cell<'a> {
         let value = match ctype {
             cell::CellType::Empty => "".to_string(),
             cell::CellType::Raw => inner.raw_value().to_string(),
+            cell::CellType::Number => inner.raw_value().to_string(),
+            cell::CellType::StyledNumber(style_id) => {
+                //let s = inner.raw_value().to_string();
+                let s = self
+                    .sheet
+                    .format_cell_with(&inner.v, style_id)
+                    .expect("format with cell style");
+                s
+            }
             cell::CellType::Shared(shared_string_id) => self
                 .sheet
                 .get_shared_string(shared_string_id)

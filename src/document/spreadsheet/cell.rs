@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 pub enum CellType {
     Empty,
     Raw,
+    Number,
+    StyledNumber(usize),
     Shared(usize),
     Styled(usize),
 }

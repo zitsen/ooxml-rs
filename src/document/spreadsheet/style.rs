@@ -29,31 +29,90 @@ pub struct NumberFormats {
 }
 impl OpenXmlDeserializeDefault for NumberFormats {}
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(rename = "numFmt")]
-pub struct Font {
+pub(crate) mod font {
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
     #[serde(rename = "sz")]
-    size: String,
-    /// the color theme id
-    color: String,
-    name: String,
-    charset: Option<String>,
-    scheme: Option<String>,
+    pub struct FontSize {
+        val: usize,
+    }
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "name")]
+    pub struct FontName {
+        val: String,
+    }
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "charset")]
+    pub struct FontCharset {
+        val: String,
+    }
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "scheme")]
+    pub struct FontScheme {
+        val: String,
+    }
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "color")]
+    pub struct FontColor {
+        theme: Option<usize>,
+        rbg: Option<String>,
+    }
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "b")]
+    pub struct FontBlack;
+
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "numFmt")]
+    pub struct Font {
+        black: Option<FontBlack>,
+        #[serde(rename = "sz")]
+        size: Option<FontSize>,
+        /// the color theme id
+        color: Option<FontColor>,
+        name: String,
+        charset: Option<String>,
+        scheme: Option<String>,
+    }
+
+    #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+    #[serde(rename = "fonts")]
+    pub struct Fonts {
+        #[serde(rename = "font")]
+        pub(crate) fonts: Vec<Font>,
+    }
 }
+pub use font::*;
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(rename = "fonts")]
-pub struct Fonts {
-    font: Vec<Font>,
+#[serde(rename = "fgColor")]
+#[serde(rename_all = "camelCase")]
+pub struct PatternFill {
+    pattern_type: Option<String>,
+    bg_color: Option<BgColor>,
+    fg_color: Option<FgColor>,
 }
-
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename = "fgColor")]
+#[serde(rename_all = "camelCase")]
+pub struct FgColor {
+    theme: Option<usize>,
+    tint: Option<f64>,
+    indexed: Option<usize>,
+}
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename = "bgColor")]
+#[serde(rename_all = "camelCase")]
+pub struct BgColor {
+    theme: Option<usize>,
+    tint: Option<f64>,
+    indexed: Option<usize>,
+}
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename = "fill")]
 #[serde(rename_all = "camelCase")]
 pub struct Fill {
-    pattern_type: Option<String>,
-    bg_color: Option<String>,
-    fg_color: Option<String>,
+    pattern_fill: Option<PatternFill>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -61,7 +120,7 @@ pub struct Fill {
 pub struct Fills {
     count: usize,
     #[serde(rename = "fill")]
-    fills: Vec<Fill>,
+    pub(crate) fills: Vec<Fill>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -94,6 +153,12 @@ pub struct Borders {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+pub struct Alignment {
+    vertical: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Xf {
     num_fmt_id: usize,
     font_id: usize,
@@ -103,12 +168,19 @@ pub struct Xf {
     apply_fill: Option<bool>,
     apply_alignment: Option<bool>,
     apply_protection: Option<bool>,
-    alignment: String,
+    alignment: Option<Alignment>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct CellStyleXfs {
+    count: usize,
+    xf: Vec<Xf>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CellXfs {
     count: usize,
     xf: Vec<Xf>,
 }
@@ -162,12 +234,35 @@ pub struct StylesPart {
     fonts: Option<Fonts>,
     fills: Option<Fills>,
     cell_style_xfs: Option<CellStyleXfs>,
+    cell_xfs: Option<CellXfs>,
     // borders: Borders,
     cell_styles: Option<CellStylesPart>,
     // ext_lst: ExtLst,
     #[serde(flatten)]
     namespaces: Namespaces,
 }
+
+#[derive(Debug)]
+pub struct CellFormatComponent<'a> {
+    styles: &'a StylesPart,
+    xf: &'a Xf,
+}
+
+impl<'a> CellFormatComponent<'a> {
+    pub fn number_format(&self) -> Option<&NumberFormat> {
+        self.styles.get_number_format(self.xf.num_fmt_id)
+    }
+    pub fn font(&self) -> Option<&Font> {
+        self.styles.get_font(self.xf.font_id)
+    }
+    pub fn fill(&self) -> Option<&Fill> {
+        self.styles.get_fill(self.xf.fill_id)
+    }
+    pub fn apply_number_format(&self) -> bool {
+        self.xf.apply_alignment.unwrap_or_default()
+    }
+}
+
 #[derive(Debug)]
 pub struct CellStyleComponent<'a> {
     styles: &'a StylesPart,
@@ -176,9 +271,28 @@ pub struct CellStyleComponent<'a> {
 
 impl<'a> CellStyleComponent<'a> {
     pub fn number_format(&self) -> Option<&NumberFormat> {
-        self.styles
-            .get_xf(self.cell_style.xf_id)
+        self.xf()
             .and_then(|xf| self.styles.get_number_format(xf.num_fmt_id))
+    }
+    pub fn xf(&self) -> Option<&Xf> {
+        self.styles.get_cell_style_xf(self.cell_style.xf_id)
+    }
+    pub fn font(&self) -> Option<&Font> {
+        self.font_id()
+            .and_then(|font_id| self.styles.get_font(font_id))
+    }
+    pub fn fill(&self) -> Option<&Fill> {
+        self.xf()
+            .map(|xf| xf.fill_id)
+            .and_then(|id| self.styles.get_fill(id))
+    }
+    pub fn apply_number_format(&self) -> bool {
+        self.xf()
+            .and_then(|xf| xf.apply_alignment)
+            .unwrap_or_default()
+    }
+    pub fn font_id(&self) -> Option<usize> {
+        self.xf().map(|xf| xf.font_id)
     }
 }
 
@@ -192,6 +306,13 @@ impl StylesPart {
             ..Default::default()
         }
     }
+    pub fn get_cell_format_component<'a>(&'a self, id: usize) -> Option<CellFormatComponent<'a>> {
+        let xf = self.get_cell_xf(id);
+        xf.map(|xf| CellFormatComponent {
+            styles: self,
+            xf,
+        })
+    }
 
     pub fn get_cell_style_component<'a>(&'a self, id: usize) -> Option<CellStyleComponent<'a>> {
         let cell_style = self.get_cell_style(id);
@@ -201,21 +322,45 @@ impl StylesPart {
         })
     }
 
+    // pub fn get_cell_xf(&self, id: usize) -> Option<&Xf> {
+    //     self.cell_xfs
+    //         .as_ref()
+    //         .and_then(|cs| cs.xf.get(id))
+    // }
+
     /// Get cell style by id, 0-based.
     pub fn get_cell_style(&self, id: usize) -> Option<&CellStyle> {
         self.cell_styles
             .as_ref()
             .and_then(|cs| cs.cell_style.get(id))
     }
+    pub fn get_cell_style_xf(&self, id: usize) -> Option<&Xf> {
+        self.cell_style_xfs.as_ref().and_then(|xf| {
+            let xf1 = dbg!(xf.xf.get(id));
+            //let xf2 = xf.xf.iter().find()
+            xf1
+        })
+    }
     /// Get cell style xf by id, 0-based.
-    pub fn get_xf(&self, id: usize) -> Option<&Xf> {
-        self.cell_style_xfs.as_ref().and_then(|xf| xf.xf.get(id))
+    pub fn get_cell_xf(&self, id: usize) -> Option<&Xf> {
+        self.cell_xfs.as_ref().and_then(|xf| {
+            let xf1 = xf.xf.get(id);
+            //let xf2 = xf.xf.iter().find()
+            xf1
+        })
     }
     /// Get cell style by id, 0-based.
     pub fn get_number_format(&self, id: usize) -> Option<&NumberFormat> {
         self.num_fmts
             .as_ref()
-            .and_then(|inner| inner.num_fmt.get(id))
+            //.and_then(|inner| inner.num_fmt.get(id))
+            .and_then(|inner| inner.num_fmt.iter().find(|nf| nf.id == id))
+    }
+    pub fn get_font(&self, id: usize) -> Option<&Font> {
+        self.fonts.as_ref().and_then(|fonts| fonts.fonts.get(id))
+    }
+    pub fn get_fill(&self, id: usize) -> Option<&Fill> {
+        self.fills.as_ref().and_then(|fills| fills.fills.get(id))
     }
 }
 
