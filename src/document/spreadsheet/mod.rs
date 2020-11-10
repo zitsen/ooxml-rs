@@ -22,7 +22,11 @@ mod style;
 mod workbook;
 mod worksheet;
 
-use self::{document_type::SpreadsheetDocumentType, style::{CellFormatComponent, CellStyleComponent}, worksheet::SheetCol};
+use self::{
+    document_type::SpreadsheetDocumentType,
+    style::{CellFormatComponent, CellStyleComponent},
+    worksheet::SheetCol,
+};
 
 use self::cell::CellValue;
 use self::shared_string::SharedStringsPart;
@@ -175,8 +179,8 @@ impl Worksheet {
         let cs = parts.get_cell_format(style_id);
         let cs = cs.unwrap();
         // if !cs.apply_number_format() {
-            // let font = dbg!(cs.font());
-            // let fill = dbg!(cs.fill());
+        // let font = dbg!(cs.font());
+        // let fill = dbg!(cs.fill());
         // }
         let nf = cs.number_format();
         if nf.is_none() {
@@ -223,9 +227,7 @@ impl Worksheet {
             (regex::Regex::new("\\\\").unwrap(), ""),
         ];
         let s = match code {
-            s if s == "General" => {
-                raw.to_string()
-            }
+            s if s == "General" => raw.to_string(),
             format if datetime_re.is_match(format) | format.ends_with(";@") => {
                 // dbg!(&format);
                 let format = format.trim_end_matches(";@");
@@ -238,7 +240,6 @@ impl Worksheet {
                     });
                 // dbg!(&format);
                 format!("{}", datetime.format(&format))
-
             }
             s => unimplemented!("unimplemented format support: {}", s),
         };
@@ -322,28 +323,18 @@ impl<'a> Cell<'a> {
             cell::CellType::Empty => "".to_string(),
             cell::CellType::Raw => inner.raw_value().to_string(),
             cell::CellType::Number => inner.raw_value().to_string(),
-            cell::CellType::StyledNumber(style_id) => {
-                //let s = inner.raw_value().to_string();
-                let s = self
-                    .sheet
-                    .format_cell_with(&inner.v, style_id)
-                    .expect("format with cell style");
-                s
-            }
             cell::CellType::Shared(shared_string_id) => self
                 .sheet
                 .get_shared_string(shared_string_id)
-                .expect("shared string not found"),
-            cell::CellType::Styled(style_id) => {
-                // let style = self.sheet.get_cell_style(style_id);
-                let s = self
-                    .sheet
-                    .format_cell_with(&inner.v, style_id)
-                    .expect("format with cell style");
-                //return s;
-                //unimplemented!()
-                s
-            }
+                .expect(&format!("shared string not found {}", shared_string_id)),
+            cell::CellType::Styled(style_id) => self
+                .sheet
+                .format_cell_with(&inner.v, style_id)
+                .expect("format with cell style"),
+            cell::CellType::StyledNumber(style_id) => self
+                .sheet
+                .format_cell_with(&inner.v, style_id)
+                .expect("format with cell style"),
         };
         Some(value)
     }

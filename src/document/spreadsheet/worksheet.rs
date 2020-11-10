@@ -127,7 +127,7 @@ impl SheetCol {
                 n if n == "n" => CellType::Number,
                 t => unimplemented!("cell type not supported: {}" , t),
             }
-            (None, Some(s)) => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+            (None, Some(s)) => CellType::Styled(*s),
             (Some(t), Some(s)) => match t {
                 t if t == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
                 t if t == "n" => CellType::StyledNumber(*s),
