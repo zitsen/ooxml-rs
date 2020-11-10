@@ -26,6 +26,12 @@ pub struct SharedString {
     t: Value,
 }
 
+impl SharedString {
+    pub fn as_str(&self) -> &str {
+        self.t.0.as_str()
+    }
+}
+
 // #[test]
 // fn custom_property_de() {
 //     const xml: &str = r#"<t>name</t>"#;
@@ -55,6 +61,15 @@ pub struct SharedStringsPart {
     namespaces: Namespaces,
     #[serde(rename = "si")]
     strings: Vec<SharedString>,
+}
+
+impl SharedStringsPart {
+    pub fn get_shared_string(&self, idx: usize) -> Option<&str> {
+        match self.strings.get(idx) {
+            None => None,
+            Some(ss) => Some(ss.as_str()),
+        }
+    }
 }
 
 impl OpenXmlElementInfo for SharedStringsPart {

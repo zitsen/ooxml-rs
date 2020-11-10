@@ -1,6 +1,15 @@
+use std::fmt::Display;
+
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub enum CellType {
+    Empty,
+    Raw,
+    Shared(usize),
+    Styled(usize),
+}
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 pub enum CellValue {
     Null,
@@ -20,6 +29,12 @@ impl CellValue {
             CellValue::Bool(_b) => panic!("unsupported cell type: bool"),
             _ => unimplemented!(),
         }
+    }
+}
+
+impl Display for CellValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
     }
 }
 

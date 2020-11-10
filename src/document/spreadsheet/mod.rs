@@ -1,6 +1,6 @@
 //! Excel file format .xlsx document implementation.
 
-use std::cell::RefCell;
+use std::{borrow::Cow, cell::RefCell};
 use std::{path::Path, rc::Rc};
 
 // use derivative::Derivative;
@@ -22,7 +22,9 @@ mod style;
 mod workbook;
 mod worksheet;
 
-use self::document_type::SpreadsheetDocumentType;
+use self::{
+    document_type::SpreadsheetDocumentType, style::CellStyleComponent, worksheet::SheetCol,
+};
 
 use self::cell::CellValue;
 use self::shared_string::SharedStringsPart;
@@ -84,6 +86,13 @@ impl SpreadsheetParts {
         this
     }
 
+    pub fn get_shared_string(&self, idx: usize) -> Option<&str> {
+        self.shared_strings.get_shared_string(idx)
+    }
+
+    pub fn get_cell_style<'a>(&'a self, id: usize) -> Option<CellStyleComponent<'a>> {
+        self.styles.get_cell_style_component(id)
+    }
     pub fn get_worksheet_part<T: AsRef<str>>(&self, uri: T) -> Option<&WorksheetPart> {
         self.worksheets.get(uri.as_ref())
     }
@@ -136,6 +145,178 @@ pub struct Worksheet {
     name: String,
     sheet_id: usize,
     part: WorksheetPart,
+}
+
+impl Worksheet {
+    pub fn dimenstion(&self) -> Option<(usize, usize)> {
+        self.part.dimension()
+    }
+    pub fn get_row_size(&self) -> usize {
+        self.dimenstion().unwrap_or_default().0
+    }
+    pub fn get_col_size(&self) -> usize {
+        self.dimenstion().unwrap_or_default().1
+    }
+    pub fn get_shared_string(&self, idx: usize) -> Option<String> {
+        let parts = self.parts.as_ref().borrow();
+        parts.get_shared_string(idx).map(|s| s.into())
+    }
+    pub fn get_cell_style(&self, id: usize) {
+        let parts = self.parts.as_ref().borrow();
+        let cs = parts.get_cell_style(id);
+        let cs = cs.unwrap();
+        let nf = cs.number_format();
+        unimplemented!()
+    }
+    /// Format a cell's raw value with given cell style id.
+    pub fn format_cell_with(&self, raw: &str, style_id: usize) -> Option<String> {
+        let parts = self.parts.as_ref().borrow();
+        let cs = parts.get_cell_style(style_id);
+        let cs = cs.unwrap();
+        let nf = cs.number_format();
+        let nf = nf.unwrap();
+        let code = nf.code.as_str();
+        let s = match code {
+            "yyyy/m/d;@" => {
+                // Excel stores dates as sequential serial numbers so that they can be used in calculations. By default, January 1, 1900 is serial number 1, and January 1, 2008 is serial number 39448 because it is 39,447 days after January 1, 1900.
+                // source: https://support.office.com/en-us/article/datevalue-function-df8b07d4-7761-4a93-bc33-b7471bbff252
+
+                // Here's calamine as_date()
+                //let days = raw.parse().expect("date time string") - 25569;
+                //let secs = days * 86400;
+                //chrono::NaiveDateTime::from_timestamp_opt(secs, 0);
+                let d1900 = chrono::NaiveDate::from_ymd(1900, 1, 1);
+                //println!("{}", d1900);
+                let d3 =
+                    d1900 + chrono::Duration::days(raw.parse().expect("not a valid date string"));
+                format!("{}", d3)
+            }
+            _ => unimplemented!(),
+        };
+        Some(s)
+    }
+    pub fn get_cell_type(&self, idx: usize) {
+        unimplemented!()
+    }
+}
+
+#[derive(Debug)]
+pub struct RowsIter<'a> {
+    sheet: &'a Worksheet,
+    row: usize,
+    col: usize,
+}
+
+#[derive(Debug)]
+pub struct RowIter<'a> {
+    sheet: &'a Worksheet,
+    row: usize,
+    col: usize,
+}
+
+impl<'a> RowsIter<'a> {
+    fn row_iter(&self) -> RowIter<'a> {
+        RowIter {
+            sheet: self.sheet,
+            row: self.row,
+            col: self.col,
+        }
+    }
+}
+
+impl<'a> Iterator for RowsIter<'a> {
+    type Item = RowIter<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.row >= self.sheet.get_row_size() {
+            return None;
+        };
+        let row = self.row_iter();
+        self.row += 1;
+        Some(row)
+    }
+}
+
+pub struct Cell<'a> {
+    sheet: &'a Worksheet,
+    row: usize,
+    col: usize,
+}
+
+impl<'a> Cell<'a> {
+    fn inner(&self) -> Option<&SheetCol> {
+        let data = self.sheet.part.sheet_data.as_ref().unwrap();
+        data.rows
+            .as_ref()
+            .and_then(|rows| rows.get(self.row))
+            .and_then(|row| row.cols.get(self.col))
+    }
+    pub fn cell_type(&self) {
+        unimplemented!()
+    }
+
+    pub fn is_merged_cell(&self) -> bool {
+        unimplemented!()
+    }
+    pub fn cell_value(&self) -> Option<CellValue> {
+        self.inner().map(|cell| cell.raw_value())
+    }
+
+    pub fn to_string(&self) -> Option<String> {
+        let inner = self.inner();
+        if inner.is_none() {
+            return None;
+        }
+        let inner = inner.unwrap();
+        let ctype = inner.cell_type();
+        let value = match ctype {
+            cell::CellType::Empty => "".to_string(),
+            cell::CellType::Raw => inner.raw_value().to_string(),
+            cell::CellType::Shared(shared_string_id) => self
+                .sheet
+                .get_shared_string(shared_string_id)
+                .expect("shared string not found"),
+            cell::CellType::Styled(style_id) => {
+                // let style = self.sheet.get_cell_style(style_id);
+                let s = self
+                    .sheet
+                    .format_cell_with(&inner.v, style_id)
+                    .expect("format with cell style");
+                //return s;
+                //unimplemented!()
+                s
+            }
+        };
+        Some(value)
+    }
+    pub fn cell_style(&self) {}
+    pub fn cell_number_format(&self) {}
+}
+impl<'a> Iterator for RowIter<'a> {
+    type Item = Cell<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.col >= self.sheet.get_col_size() {
+            return None;
+        };
+        let cell = Cell {
+            sheet: self.sheet,
+            row: self.row,
+            col: self.col,
+        };
+        self.col += 1;
+        Some(cell)
+    }
+}
+
+impl Worksheet {
+    pub fn rows<'a>(&'a self) -> RowsIter<'a> {
+        RowsIter {
+            sheet: self,
+            row: 0,
+            col: 0,
+        }
+    }
 }
 #[derive(Derivative, Default)]
 #[derivative(Debug, Clone)]
@@ -274,7 +455,47 @@ fn open() {
         SpreadsheetDocument::open("examples/simple-spreadsheet/data-image-demo.xlsx").unwrap();
 
     let workbook = xlsx.get_workbook();
+    //println!("{:?}", xlsx);
 
     let _sheet_names = workbook.worksheet_names();
-    println!("{:?}", xlsx);
+
+    for (sheet_idx, sheet) in workbook.worksheets().iter().enumerate() {
+        println!("worksheet {}", sheet_idx);
+        println!("worksheet dimension: {:?}", sheet.dimenstion());
+        println!("---------DATA---------");
+        for rows in sheet.rows() {
+            let cols: Vec<String> = rows
+                .into_iter()
+                .map(|cell| cell.to_string().unwrap_or_default())
+                .collect();
+            // use iertools::join or write to csv.
+            println!(
+                "{}",
+                cols.iter().fold(String::new(), |mut l, c| {
+                    if l.is_empty() {
+                        l.push_str(c);
+                    } else {
+                        l.push(',');
+                        l.push_str(c)
+                    }
+                    l
+                })
+            );
+        }
+        println!("----------------------");
+    }
+}
+
+#[test]
+fn chrono() {
+    let fmt = "yyyy/m/d";
+    let v = 29567;
+    let date = chrono::Duration::days(v);
+    let date2 = chrono::NaiveDate::from_ymd(1980, 12, 12);
+    let date3 = date2 - date;
+    println!("{}", date3);
+    let d1900 = chrono::NaiveDate::from_ymd(1900, 1, 1);
+    println!("{}", d1900);
+    let d3 = d1900 + chrono::Duration::days(v);
+    println!("{}", d3);
 }

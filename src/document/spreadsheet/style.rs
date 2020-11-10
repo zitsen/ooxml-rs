@@ -8,7 +8,7 @@ pub struct NumberFormat {
     #[serde(rename = "numFmtId")]
     id: usize,
     #[serde(rename = "formatCode")]
-    code: String,
+    pub code: String,
 }
 
 impl OpenXmlElementInfo for NumberFormat {
@@ -123,7 +123,7 @@ pub struct CellStyle {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct CellStyles {
+pub struct CellStylesPart {
     count: usize,
     cell_style: Vec<CellStyle>,
 }
@@ -163,10 +163,23 @@ pub struct StylesPart {
     fills: Option<Fills>,
     cell_style_xfs: Option<CellStyleXfs>,
     // borders: Borders,
-    cell_styles: Option<CellStyles>,
+    cell_styles: Option<CellStylesPart>,
     // ext_lst: ExtLst,
     #[serde(flatten)]
     namespaces: Namespaces,
+}
+#[derive(Debug)]
+pub struct CellStyleComponent<'a> {
+    styles: &'a StylesPart,
+    cell_style: &'a CellStyle,
+}
+
+impl<'a> CellStyleComponent<'a> {
+    pub fn number_format(&self) -> Option<&NumberFormat> {
+        self.styles
+            .get_xf(self.cell_style.xf_id)
+            .and_then(|xf| self.styles.get_number_format(xf.num_fmt_id))
+    }
 }
 
 impl StylesPart {
@@ -178,6 +191,14 @@ impl StylesPart {
             namespaces,
             ..Default::default()
         }
+    }
+
+    pub fn get_cell_style_component<'a>(&'a self, id: usize) -> Option<CellStyleComponent<'a>> {
+        let cell_style = self.get_cell_style(id);
+        cell_style.map(|cell_style| CellStyleComponent {
+            styles: self,
+            cell_style,
+        })
     }
 
     /// Get cell style by id, 0-based.
