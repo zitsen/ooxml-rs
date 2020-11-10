@@ -185,7 +185,10 @@ impl Worksheet {
                 //let days = raw.parse().expect("date time string") - 25569;
                 //let secs = days * 86400;
                 //chrono::NaiveDateTime::from_timestamp_opt(secs, 0);
-                let d1900 = chrono::NaiveDate::from_ymd(1900, 1, 1);
+
+                // use 1899.12.30 instead of 1900.1.1 to fix bug in excel date.
+                //let d1900 = chrono::NaiveDate::from_ymd(1900, 1, 1);
+                let d1900 = chrono::NaiveDate::from_ymd(1899, 12, 30);
                 //println!("{}", d1900);
                 let d3 =
                     d1900 + chrono::Duration::days(raw.parse().expect("not a valid date string"));
