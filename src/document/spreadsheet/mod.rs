@@ -241,7 +241,11 @@ impl Worksheet {
                 // dbg!(&format);
                 format!("{}", datetime.format(&format))
             }
-            s => unimplemented!("unimplemented format support: {}", s),
+            s => {
+                // FIXME(@zitsen): support custom format like dollars, etc.
+                eprintln!("unimplemented format support: {}", s);
+                raw.to_string()
+            }
         };
         Some(s)
     }
