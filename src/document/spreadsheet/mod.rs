@@ -174,6 +174,83 @@ impl Worksheet {
         unimplemented!()
     }
     /// Format a cell's raw value with given cell style id.
+    pub fn to_cell_value(&self, raw: &str, style_id: usize) -> Option<CellValue> {
+        let parts = self.parts.as_ref().borrow();
+        let cs = parts.get_cell_format(style_id);
+        let cs = cs.unwrap();
+        // if !cs.apply_number_format() {
+        // let font = dbg!(cs.font());
+        // let fill = dbg!(cs.fill());
+        // }
+        let nf = cs.number_format();
+        if nf.is_none() {
+            dbg!(raw, style_id);
+            // dbg!(cs.xf());
+            return Some(CellValue::String(raw.to_string()));
+        }
+        let nf = nf.unwrap();
+        let code = nf.code.as_str();
+        //println!("code: {}", code);
+
+        fn parse_datetime(raw: &str) -> Option<chrono::NaiveDateTime> {
+            if let Ok(days) = raw.parse::<i64>() {
+                let days = days - 25569;
+                let secs = days * 86400;
+                chrono::NaiveDateTime::from_timestamp_opt(secs, 0)
+            } else if let Ok(datetime) = raw.parse::<f64>() {
+                let unix_days = datetime - 25569.;
+                let unix_secs = unix_days * 86400.;
+                let secs = unix_secs.trunc() as i64;
+                let nsecs = (unix_secs.fract().abs() * 1e9) as u32;
+                chrono::NaiveDateTime::from_timestamp_opt(secs, nsecs)
+            } else {
+                None
+            }
+        }
+        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d|h|ss|a{2,5}").unwrap();
+
+        let datetime_replaces = vec![
+            (regex::Regex::new(":mm").unwrap(), ":%M"),
+            (regex::Regex::new("mm:").unwrap(), "%M:"),
+            (regex::Regex::new("mm").unwrap(), "%m"),
+            (regex::Regex::new("yyyy+").unwrap(), "%Y"),
+            (regex::Regex::new("yy+").unwrap(), "%y"),
+            (regex::Regex::new("mmmm+").unwrap(), "%B"),
+            (regex::Regex::new("mmm").unwrap(), "%b"),
+            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%m"),
+            (regex::Regex::new("d+").unwrap(), "%d"),
+            (regex::Regex::new("a{4,}").unwrap(), "%A"),
+            (regex::Regex::new("a{3}").unwrap(), "%a"),
+            (regex::Regex::new("a{2}").unwrap(), "%w"),
+            (regex::Regex::new("h").unwrap(), "%H"),
+            (regex::Regex::new("ss").unwrap(), "%S"),
+            (regex::Regex::new("\\\\").unwrap(), ""),
+        ];
+        let s = match code {
+            s if s == "General" => CellValue::String(raw.to_string()),
+            format if datetime_re.is_match(format) | format.ends_with(";@") => {
+                // dbg!(&format);
+                let format = format.trim_end_matches(";@");
+                let datetime = parse_datetime(raw).unwrap();
+
+                let format = datetime_replaces
+                    .iter()
+                    .fold(snailquote::unescape(format).unwrap(), |f, (re, s)| {
+                        re.replace_all(&f, *s).to_string()
+                    });
+                // dbg!(&format);
+                CellValue::DateTime(datetime, format)
+                // format!("{}", datetime.format(&format))
+            }
+            s => {
+                // FIXME(@zitsen): support custom format like dollars, etc.
+                eprintln!("unimplemented format support: {}", s);
+                CellValue::String(raw.to_string())
+            }
+        };
+        Some(s)
+    }
+    /// Format a cell's raw value with given cell style id.
     pub fn format_cell_with(&self, raw: &str, style_id: usize) -> Option<String> {
         let parts = self.parts.as_ref().borrow();
         let cs = parts.get_cell_format(style_id);
@@ -312,8 +389,42 @@ impl<'a> Cell<'a> {
     pub fn is_merged_cell(&self) -> bool {
         unimplemented!()
     }
-    pub fn cell_value(&self) -> Option<CellValue> {
-        self.inner().map(|cell| cell.raw_value())
+
+    pub fn as_raw_str(&self) -> Option<&str> {
+        self.inner().map(|s| s.as_raw_str())
+    }
+    // pub fn cell_value(&self) -> Option<CellValue> {
+    //     self.inner().map(|cell| cell.raw_value())
+    // }
+
+    /// get cell value
+    pub fn value(&self) -> Option<CellValue> {
+        let inner = self.inner();
+        if inner.is_none() {
+            return None;
+        }
+        let inner = inner.unwrap();
+        let raw = inner.as_raw_str();
+        let ctype = inner.cell_type();
+        let value = match ctype {
+            cell::CellType::Empty => CellValue::Null,
+            cell::CellType::Raw => CellValue::String(raw.to_string()),
+            cell::CellType::Number => CellValue::String(raw.to_string()),
+            cell::CellType::Shared(shared_string_id) => CellValue::String(
+                self.sheet
+                    .get_shared_string(shared_string_id)
+                    .expect(&format!("shared string not found {}", shared_string_id)),
+            ),
+            cell::CellType::Styled(style_id) => self
+                .sheet
+                .to_cell_value(&inner.v, style_id)
+                .expect("format with cell style"),
+            cell::CellType::StyledNumber(style_id) => self
+                .sheet
+                .to_cell_value(&inner.v, style_id)
+                .expect("format with cell style"),
+        };
+        Some(value)
     }
 
     pub fn to_string(&self) -> Option<String> {

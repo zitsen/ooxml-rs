@@ -116,6 +116,9 @@ pub struct SheetCol {
 }
 
 impl SheetCol {
+    pub fn as_raw_str(&self) -> &str {
+        self.v.as_str()
+    }
     pub fn raw_value(&self) -> CellValue {
         CellValue::String(self.v.to_string())
     }

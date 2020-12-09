@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::{DateTime, Local};
+use chrono::{DateTime, NaiveDateTime, Local};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -20,7 +20,9 @@ pub enum CellValue {
     Byte(u8),
     Double(f64),
     String(String),
-    DateTime(DateTime<Local>),
+    //DateTime(DateTime<Local>),
+    DateTime(NaiveDateTime, String),
+    Raw(String),
 }
 
 impl CellValue {
@@ -28,7 +30,10 @@ impl CellValue {
         match self {
             CellValue::Null => "".to_string(),
             CellValue::String(v) => v.clone(),
+            CellValue::Raw(v) => v.clone(),
             CellValue::Bool(_b) => panic!("unsupported cell type: bool"),
+            CellValue::Double(f) => format!("{}", f),
+            CellValue::DateTime(datetime, format) => format!("{}", datetime.format(&format)),
             _ => unimplemented!(),
         }
     }
@@ -83,4 +88,3 @@ impl_to_cell_value!(bool, Bool);
 impl_to_cell_value!(f32, Double);
 impl_to_cell_value!(f64, Double);
 impl_to_cell_value!(String, String);
-impl_to_cell_value!(DateTime<Local>, DateTime);

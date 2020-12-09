@@ -14,23 +14,12 @@ fn main() {
         println!("worksheet dimension: {:?}", sheet.dimenstion());
         println!("---------DATA---------");
         for rows in sheet.rows() {
-            let cols: Vec<String> = rows
+            // get cell values
+            let cols: Vec<_> = rows
                 .into_iter()
-                .map(|cell| cell.to_string().unwrap_or_default())
+                .map(|cell| cell.value().unwrap_or_default())
                 .collect();
-            // use iertools::join or write to csv.
-            println!(
-                "{}",
-                cols.iter().fold(String::new(), |mut l, c| {
-                    if l.is_empty() {
-                        l.push_str(c);
-                    } else {
-                        l.push(',');
-                        l.push_str(c)
-                    }
-                    l
-                })
-            );
+            println!("{}", itertools::join(&cols, ","));
         }
         println!("----------------------");
     }

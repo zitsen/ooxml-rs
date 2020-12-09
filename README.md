@@ -1,15 +1,12 @@
 # OOXML - Office OpenXML parser in Rust
 
-**The source code is in my private github project https://github.com/zitsen/ooxml-rs . I'm glad to add you as a member of the project when I have your github username.**
-
-This crate is started as a private-purposed project with limited knownledge of Office Open XML. Never use it in production!!!
-本项目只作为学习使用，不包含任何开发承诺，不可用于生产环境！！！！
+**This crate is started as a private-purposed project with limited knownledge of Office Open XML, use it with caution!**
 
 > Office Open XML，为由Microsoft开发的一种以XML为基础并以ZIP格式压缩的电子文件规范，支持文件、表格、备忘录、幻灯片等文件格式。
 
 > Office Open XML (also informally known as OOXML or Microsoft Open XML (MOX)) is a zipped, XML-based file format developed by Microsoft for representing spreadsheets, charts, presentations and word processing documents. The format was initially standardized by Ecma (as ECMA-376), and by the ISO and IEC (as ISO/IEC 29500) in later versions.
 
-OOXML, as it's naming, is trying to be a pure rust implementation of Office Open XML parser - reading and writing ooxml components efficiently in Rust.
+OOXML, as it's naming, is trying to be a pure rust implementation of Office Open XML parser - reading and writing ooxml components efficiently in Rust. But at now, only xlsx parsing is supported.
 
 ## TLDR;
 
@@ -32,25 +29,13 @@ fn main() {
         println!("worksheet dimension: {:?}", sheet.dimenstion());
         println!("---------DATA---------");
         for rows in sheet.rows() {
-            let cols: Vec<String> = rows
+            // get cell values
+            let cols: Vec<_> = rows
                 .into_iter()
-                .map(|cell| cell.to_string().unwrap_or_default())
+                .map(|cell| cell.value().unwrap_or_default())
                 .collect();
-            // use iertools::join or write to csv.
-            println!(
-                "{}",
-                cols.iter().fold(String::new(), |mut l, c| {
-                    if l.is_empty() {
-                        l.push_str(c);
-                    } else {
-                        l.push(',');
-                        l.push_str(c)
-                    }
-                    l
-                })
-            );
+            println!("{}", itertools::join(&cols, ","));
         }
-        println!("----------------------");
     }
 }
 
