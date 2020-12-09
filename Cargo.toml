@@ -7,6 +7,10 @@ keywords = ["ooxml", "xml", "office", "word", "docx", "excel", "xlsx", "ppt", "p
 license = "MIT OR Apache 2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[package.metadata.release]
+pre-release-commit-message = "release: {{version}}"
+post-release-commit-message = "chore(dev): start next development iteration {{version}}"
+
 [dependencies]
 log = "0.4.11"
 derivative = "2.1.1"

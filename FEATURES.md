@@ -1,0 +1,22 @@
+# 截止2020-11-16(fb254c9)完成及进行中的功能
+
+- [ ] Office OpenXML Package Conversion(OPC) 标准打包约定
+  - [x] 基于OPC格式约定下的ZIP读取和写入
+  - [x] OPC公共组件ContentTypes文件读写，支持serde序列化
+  - [x] OPC公共组件docProps目录中各文件读写，包括app.xml/core.xml/custom.xml
+  - [x] Relationship基础组件定义和实现，支持serde序列化
+  - [x] VTTypes基础类型定义和实现，支持serde序列化
+  - [x] 用于XML序列化的公共Trait定义和实现
+  - [ ] 用于Part的公共定义
+- [ ] Spreadsheet表格
+  - [x] 基于OPC实现表格的定义
+  - [ ] 基于OPC实现表格的修改和保存
+  - [x] 解析Spreadsheet中的工作簿（workbook），获取worksheet列表，基于workbook的Relationships得到各个Part的关联关系。
+  - [x] 解析Styles，实现serde支持
+  - [x] 解析sharedStrings
+  - [ ] 解析Themes主题（未实现）
+  - [ ] 解析worksheet（部分实现）
+    - [ ] Cell，单元格
+      - [x] 支持解析文本和数字
+      - [x] 支持解析自定义日期格式
+      - [ ] 支持解析自定义数字格式(待实现)
