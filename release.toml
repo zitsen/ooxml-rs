@@ -1,0 +1,5 @@
+sign-commit = true
+sign-tag = true
+#upload-doc = true
+pre-release-hook = ["./clog.sh"]
+exclude-paths = ["/README.md", "/tests/**", "/examples/**"]
