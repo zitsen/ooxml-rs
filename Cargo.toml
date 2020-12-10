@@ -1,6 +1,6 @@
 [package]
 name = "ooxml"
-version = "0.1.1"
+version = "0.1.2-alpha.0"
 authors = ["Huo Linhe <linhehuo@gmail.com>"]
 edition = "2018"
 keywords = ["xml", "office", "docx", "excel", "xlsx"]
