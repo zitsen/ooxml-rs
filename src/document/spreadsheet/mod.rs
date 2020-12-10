@@ -102,6 +102,10 @@ impl SpreadsheetParts {
         self.worksheets.get(uri.as_ref())
     }
 
+    pub fn sheet_names(&self) -> Vec<&str> {
+        self.workbook.sheet_names()
+    }
+
     fn parse_worksheets(&mut self) {
         // Parse sheet data by relationship target.
         for sheet in &self.workbook.sheets.sheets {
@@ -525,11 +529,24 @@ impl Workbook {
     pub fn worksheet_names(&self) -> Vec<String> {
         self.parts
             .borrow()
-            .workbook
             .sheet_names()
-            .into_iter()
-            .map(|v| v.clone())
+            .iter()
+            .map(|s| s.to_string())
             .collect()
+    }
+
+    pub fn get_worksheet_by_name(&self, name: &str) -> Option<&Worksheet> {
+        if let Some(idx) = self
+            .parts
+            .borrow()
+            .sheet_names()
+            .iter()
+            .position(|n| *n == name)
+        {
+            self.worksheets.get(idx)
+        } else {
+            None
+        }
     }
 
     /// Immutable worksheets slice

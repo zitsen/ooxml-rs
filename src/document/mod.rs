@@ -5,4 +5,4 @@ mod presentation;
 mod spreadsheet;
 mod wordprocessing;
 
-pub use spreadsheet::SpreadsheetDocument;
+pub use spreadsheet::*;
