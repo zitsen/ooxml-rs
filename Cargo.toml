@@ -5,6 +5,11 @@ authors = ["Huo Linhe <linhehuo@gmail.com>"]
 edition = "2018"
 keywords = ["xml", "office", "docx", "excel", "xlsx"]
 license = "MIT OR Apache 2.0"
+description = "An Office OpenXML parser writen in Rust"
+documentation = "https://docs.rs/ooxml"
+readme = "README.md"
+repository = "https://github.com/zitsen/ooxml-rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [package.metadata.release]
