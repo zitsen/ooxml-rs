@@ -159,7 +159,7 @@ src
 - **`Component`**: A `Component` is the bridge of behaviors and the internal OpenXML stuff, including `Package`, `Element`, and `Part`.
 - **`Property`**: A `Property` represents attributes for an element.
 - **`Document`**: A `Document` is the entry `Component` for an real document, eg. `SpreadSheetDocument` etc.
-- **`RelationShip`**: A `RelationShip` is a link relationship for the element and other resources from a `Part`.
+- **`Relationship`**: A `Relationship` is a link relationship for the element and other resources from a `Part`.
 
 The data flows open or create an document will be like below.
 
