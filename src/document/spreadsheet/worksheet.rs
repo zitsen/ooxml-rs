@@ -64,7 +64,12 @@ impl Dimension {
             let re: regex::Regex = regex::Regex::new(r"(?P<col>[A-Z]+)(?P<row>\d+)").unwrap();
             let cap = re.captures(range).unwrap();
             let col = cap.name("col").unwrap().as_str();
-            let row = cap.name("row").unwrap().as_str().parse().unwrap_or_default();
+            let row = cap
+                .name("row")
+                .unwrap()
+                .as_str()
+                .parse()
+                .unwrap_or_default();
             fn col_to_idx(col: &str) -> usize {
                 if col.is_empty() {
                     return 0;
@@ -73,7 +78,6 @@ impl Dimension {
                 for (i, c) in col.chars().rev().enumerate() {
                     let c = c.to_digit(36).unwrap();
                     idx += c * 26u32.pow(i as _);
-
                 }
                 return idx as usize;
             }
@@ -99,43 +103,65 @@ pub struct SheetFormatPr {
     outline_level_row: Option<f32>,
     outline_level_col: Option<f32>,
 }
-
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", rename = "v")]
-pub struct SheetValue {
-    v: CellValue,
+#[serde(rename_all = "camelCase", rename = "is")]
+pub struct SheetCellIs {
+    t: Option<String>,
 }
+
+// #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+// #[serde(rename_all = "camelCase", rename = "v")]
+// pub struct SheetValue {
+//     v: Option<CellValue>,
+// }
+
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "c")]
 pub struct SheetCol {
     pub r: String,
     pub t: Option<String>,
     pub s: Option<usize>,
-    #[serde(rename = "$value")]
-    pub v: String,
+    pub is: Option<SheetCellIs>,
+    //#[serde(rename = "$value")]
+    // pub v: String,
+    pub v: Option<String>,
 }
 
 impl SheetCol {
     pub fn as_raw_str(&self) -> &str {
-        self.v.as_str()
+        if let Some(is) = self.is.as_ref() {
+            return is.t.as_ref().expect("inline str error")
+        } else if let Some(v) = self.v.as_ref() {
+            return v.as_str();
+        } else {
+            unreachable!()
+        }
+        // self.v.as_str()
     }
     pub fn raw_value(&self) -> CellValue {
-        CellValue::String(self.v.to_string())
+        
+        CellValue::String(self.as_raw_str().to_string())
     }
     pub fn cell_type(&self) -> CellType {
         match (self.t.as_ref(), self.s.as_ref()) {
             (None, None) => CellType::Raw,
             (Some(t), None) => match t {
-                s if s == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+                s if s == "s" => {
+                    CellType::Shared(self.v.as_ref().expect("shared string has no id").parse().expect("sharedString id not valid"))
+                }
                 n if n == "n" => CellType::Number,
-                t => unimplemented!("cell type not supported: {}" , t),
-            }
+                t if t == "inlineStr" => CellType::Raw,
+                t => unimplemented!("cell type not supported: {}", t),
+            },
             (None, Some(s)) => CellType::Styled(*s),
             (Some(t), Some(s)) => match t {
-                t if t == "s" => CellType::Shared(self.v.parse().expect("sharedString id not valid")),
+                t if t == "s" => {
+                    CellType::Shared(self.v.as_ref().expect("shared string has no id").parse().expect("sharedString id not valid"))
+                }
                 t if t == "n" => CellType::StyledNumber(*s),
-                t => unimplemented!("cell type not supported: {}" , t),
-            }
+                t if t == "inlineStr" => CellType::Raw,
+                t => unimplemented!("cell type not supported: {}", t),
+            },
         }
         // if let Some(t) = self.t.as_ref() {
         //     match t {
@@ -154,6 +180,9 @@ impl SheetCol {
 #[serde(rename = "row")]
 pub struct SheetRow {
     pub r: usize,
+    #[serde(rename = "customHeight")]
+    pub custom_height: Option<bool>,
+    pub ht: Option<f64>,
     pub spans: Option<String>,
     #[serde(rename = "c")]
     pub cols: Vec<SheetCol>,
@@ -183,13 +212,13 @@ pub struct HeaderFooter {}
 pub struct WorksheetPart {
     #[serde(flatten)]
     namespaces: Namespaces,
-    pub sheet_pr: SheetPr,
+    pub sheet_pr: Option<SheetPr>,
     pub dimension: Option<Dimension>,
     pub sheet_views: Option<SheetViews>,
     pub sheet_format_pr: Option<SheetFormatPr>,
     pub sheet_data: Option<SheetData>,
-    pub page_margins: PageMargins,
-    pub header_footer: HeaderFooter,
+    pub page_margins: Option<PageMargins>,
+    pub header_footer: Option<HeaderFooter>,
 }
 
 impl WorksheetPart {
@@ -231,6 +260,7 @@ impl OpenXmlSerialize for WorksheetPart {
 
 #[test]
 fn serde() {
+    // let xml = include_str!("../../../tests/inline-str/xl/worksheets/sheet1.xml");
     let xml = include_str!("../../../examples/simple-spreadsheet/xl/worksheets/sheet1.xml");
     println!("{}", xml);
     let worksheet = WorksheetPart::from_xml_str(xml).unwrap();
@@ -247,4 +277,16 @@ fn serde() {
     let worksheet2: WorksheetPart = quick_xml::de::from_str(&str).unwrap();
     println!("{:?}", worksheet2);
     assert_eq!(worksheet, worksheet2);
+}
+
+#[test]
+fn cell() {
+    let xml = r#"
+    <c r="B2" s="1" t="inlineStr">
+        <is>
+            <t>&#21776;&#33564;</t>
+        </is>
+    </c>"#;
+    let c: SheetCol = quick_xml::de::from_str(xml).unwrap();
+    println!("{:?}", c);
 }

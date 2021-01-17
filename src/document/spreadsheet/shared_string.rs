@@ -60,15 +60,12 @@ pub struct SharedStringsPart {
     #[serde(flatten)]
     namespaces: Namespaces,
     #[serde(rename = "si")]
-    strings: Vec<SharedString>,
+    strings: Option<Vec<SharedString>>,
 }
 
 impl SharedStringsPart {
     pub fn get_shared_string(&self, idx: usize) -> Option<&str> {
-        match self.strings.get(idx) {
-            None => None,
-            Some(ss) => Some(ss.as_str()),
-        }
+        self.strings.as_ref().and_then(|ss| ss.get(idx)).map(|ss| ss.as_str())
     }
 }
 
@@ -142,7 +139,7 @@ impl SharedStringsPart {
             },
         ]);
         xml.write_event(Event::Start(elem))?;
-        for si in &self.strings {
+        for si in self.strings.as_ref().unwrap_or(&vec![]) {
             let elem = BytesStart::borrowed_name(SHARED_STRING_TAG.as_bytes());
             xml.write_event(Event::Start(elem))?;
             quick_xml::se::to_writer(xml.inner(), &si.t)?;

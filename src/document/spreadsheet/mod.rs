@@ -63,17 +63,17 @@ impl SpreadsheetParts {
         let workbook = {
             let package = package.borrow();
             let part = package.get_part("xl/workbook.xml").unwrap();
-            WorkbookPart::from_xml_reader(part.as_part_bytes()).expect("workbook part error")
+            WorkbookPart::from_xml_reader(part.as_part_bytes()).expect("workbook main part error")
         };
         let shared_strings = {
             let package = package.borrow();
             let part = package.get_part("xl/sharedStrings.xml").unwrap();
-            SharedStringsPart::from_xml_reader(part.as_part_bytes()).expect("workbook part error")
+            SharedStringsPart::from_xml_reader(part.as_part_bytes()).expect("workbook shared strings error")
         };
         let styles = {
             let package = package.borrow();
             let part = package.get_part("xl/styles.xml").unwrap();
-            StylesPart::from_xml_reader(part.as_part_bytes()).expect("workbook part error")
+            StylesPart::from_xml_reader(part.as_part_bytes()).expect("workbook styles error")
         };
         let mut this = Self {
             package: package,
@@ -120,7 +120,7 @@ impl SpreadsheetParts {
                 .get_part(&format!("xl/{}", worksheet_uri))
                 .expect("get worksheet part by uri");
             let sheet =
-                WorksheetPart::from_xml_reader(part.as_part_bytes()).expect("parse worksheet");
+                WorksheetPart::from_xml_reader(part.as_part_bytes()).expect("parse worksheet error");
 
             self.worksheets.insert(worksheet_uri.into(), sheet);
         }
@@ -421,11 +421,11 @@ impl<'a> Cell<'a> {
             ),
             cell::CellType::Styled(style_id) => self
                 .sheet
-                .to_cell_value(&inner.v, style_id)
+                .to_cell_value(&inner.as_raw_str(), style_id)
                 .expect("format with cell style"),
             cell::CellType::StyledNumber(style_id) => self
                 .sheet
-                .to_cell_value(&inner.v, style_id)
+                .to_cell_value(&inner.as_raw_str(), style_id)
                 .expect("format with cell style"),
         };
         Some(value)
@@ -448,11 +448,11 @@ impl<'a> Cell<'a> {
                 .expect(&format!("shared string not found {}", shared_string_id)),
             cell::CellType::Styled(style_id) => self
                 .sheet
-                .format_cell_with(&inner.v, style_id)
+                .format_cell_with(&inner.as_raw_str(), style_id)
                 .expect("format with cell style"),
             cell::CellType::StyledNumber(style_id) => self
                 .sheet
-                .format_cell_with(&inner.v, style_id)
+                .format_cell_with(&inner.as_raw_str(), style_id)
                 .expect("format with cell style"),
         };
         Some(value)

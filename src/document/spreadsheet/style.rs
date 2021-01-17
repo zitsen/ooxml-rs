@@ -25,7 +25,7 @@ impl OpenXmlDeserializeDefault for NumberFormat {}
 #[serde(rename = "numFmts")]
 pub struct NumberFormats {
     #[serde(rename = "numFmt")]
-    num_fmt: Vec<NumberFormat>,
+    num_fmt: Option<Vec<NumberFormat>>,
 }
 impl OpenXmlDeserializeDefault for NumberFormats {}
 
@@ -35,7 +35,7 @@ pub(crate) mod font {
     #[derive(Debug, Clone, Default, Serialize, Deserialize)]
     #[serde(rename = "sz")]
     pub struct FontSize {
-        val: usize,
+        val: f64,
     }
     #[derive(Debug, Clone, Default, Serialize, Deserialize)]
     #[serde(rename = "name")]
@@ -354,7 +354,8 @@ impl StylesPart {
         self.num_fmts
             .as_ref()
             //.and_then(|inner| inner.num_fmt.get(id))
-            .and_then(|inner| inner.num_fmt.iter().find(|nf| nf.id == id))
+            .and_then(|inner| inner.num_fmt.as_ref())
+            .and_then(|inner| inner.iter().find(|nf| nf.id == id))
     }
     pub fn get_font(&self, id: usize) -> Option<&Font> {
         self.fonts.as_ref().and_then(|fonts| fonts.fonts.get(id))

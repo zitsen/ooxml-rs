@@ -17,7 +17,9 @@ pub struct FileVersion {
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "workbookPr")]
-pub struct WorkbookPr {}
+pub struct WorkbookPr {
+    date1904: Option<bool>,
+}
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "workbookView")]
@@ -57,11 +59,11 @@ pub struct CalcPr {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorkbookPart {
-    pub file_version: FileVersion,
+    pub file_version: Option<FileVersion>,
     pub book_views: BookViews,
     pub workbook_pr: WorkbookPr,
     pub sheets: Sheets,
-    pub calc_pr: CalcPr,
+    pub calc_pr: Option<CalcPr>,
     #[serde(flatten)]
     namespaces: Namespaces,
 }
