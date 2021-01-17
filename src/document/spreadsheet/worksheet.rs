@@ -50,12 +50,12 @@ pub struct Dimension {
 }
 
 impl Dimension {
-    pub fn dimension(&self) -> (usize, usize) {
+    pub fn dimension(&self) -> Option<(usize, usize)> {
         let range = self.r#ref.as_str();
         let range: Vec<&str> = range.split_terminator(':').collect();
 
         if range.len() < 2 {
-            return (1, 1);
+            return None;
         }
         let start = range[0];
         let end = range[1];
@@ -85,7 +85,7 @@ impl Dimension {
         }
         let start = rangify(start);
         let end = rangify(end);
-        (end.0 - start.0 + 1, end.1 - start.1 + 1)
+        Some((end.0 - start.0 + 1, end.1 - start.1 + 1))
     }
 }
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
@@ -195,6 +195,22 @@ pub struct SheetData {
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", rename = "col")]
+pub struct SheetColHeader {
+    min: Option<usize>,
+    max: Option<usize>,
+    width: Option<f64>,
+    custom_width: Option<bool>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", rename = "cols")]
+pub struct SheetCols {
+    #[serde(rename = "col")]
+    pub cols: Option<Vec<SheetColHeader>>,
+}
+
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "pageMargins")]
 pub struct PageMargins {
     left: Option<f32>,
@@ -216,14 +232,29 @@ pub struct WorksheetPart {
     pub dimension: Option<Dimension>,
     pub sheet_views: Option<SheetViews>,
     pub sheet_format_pr: Option<SheetFormatPr>,
+    pub cols: Option<SheetCols>,
     pub sheet_data: Option<SheetData>,
     pub page_margins: Option<PageMargins>,
     pub header_footer: Option<HeaderFooter>,
 }
 
 impl WorksheetPart {
+    
+    /// calculate dimension from dimension element if exists.
     pub fn dimension(&self) -> Option<(usize, usize)> {
-        self.dimension.as_ref().map(|dim| dim.dimension())
+        self.dimension.as_ref().and_then(|dim| dim.dimension())
+    }
+    /// Calculate dimension from real data, cols and rows.
+    pub fn real_dimension(&self) -> Option<(usize, usize)> {
+        match (
+            self.cols.as_ref().and_then(|cols| cols.cols.as_ref()),
+            self.sheet_data.as_ref().and_then(|sd| sd.rows.as_ref()),
+        ) {
+            (Some(cols), Some(rows)) => Some((rows.len(), cols.len())),
+            (Some(cols), None) => Some((0, cols.len())),
+            (None, Some(rows)) => Some((rows.len(), 0)),
+            _ => None,
+        }
     }
 }
 

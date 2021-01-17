@@ -158,7 +158,8 @@ pub struct Worksheet {
 
 impl Worksheet {
     pub fn dimenstion(&self) -> Option<(usize, usize)> {
-        self.part.dimension()
+        // self.part.dimension()
+        self.part.dimension().or_else(||self.part.real_dimension())
     }
     pub fn get_row_size(&self) -> usize {
         self.dimenstion().unwrap_or_default().0
