@@ -1,5 +1,3 @@
-#![feature(str_split_once)]
-
 /// Error module
 pub mod error;
 
