@@ -42,22 +42,22 @@ pub const PROPERTY_VERSION_TAG: &str = "cp:version";
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct Properties {
-    category: Option<String>,
-    content_status: Option<String>,
-    content_type: Option<ContentType>,
-    created: Option<DateTime>,
-    creator: Option<String>,
-    description: Option<String>,
-    identifier: Option<String>,
-    keywords: Option<String>,
-    language: Option<String>,
-    modified: Option<String>,
-    last_modified_by: Option<String>,
-    last_printed: Option<DateTime>,
-    revision: Option<String>,
-    subject: Option<String>,
-    title: Option<String>,
-    version: Option<String>,
+    pub category: Option<String>,
+    pub content_status: Option<String>,
+    pub content_type: Option<ContentType>,
+    pub created: Option<DateTime>,
+    pub creator: Option<String>,
+    pub description: Option<String>,
+    pub identifier: Option<String>,
+    pub keywords: Option<String>,
+    pub language: Option<String>,
+    pub modified: Option<String>,
+    pub last_modified_by: Option<String>,
+    pub last_printed: Option<DateTime>,
+    pub revision: Option<String>,
+    pub subject: Option<String>,
+    pub title: Option<String>,
+    pub version: Option<String>,
 }
 
 impl fmt::Display for Properties {

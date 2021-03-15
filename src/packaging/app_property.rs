@@ -76,17 +76,17 @@ pub struct HeadingPairs {
 #[serde(rename = "Properties", rename_all = "PascalCase")]
 pub struct AppProperties {
     #[serde(flatten, skip_serializing)]
-    namespaces: Namespaces,
-    application: Option<Application>,
-    heading_pairs: Option<HeadingPairs>,
-    titles_of_parts: Option<TitlesOfParts>,
-    lines: Option<String>,
-    links_up_to_date: Option<String>,
-    local_name: Option<String>,
-    company: Option<String>,
-    template: Option<String>,
-    manager: Option<String>,
-    pages: Option<String>,
+    pub namespaces: Namespaces,
+    pub application: Option<Application>,
+    pub heading_pairs: Option<HeadingPairs>,
+    pub titles_of_parts: Option<TitlesOfParts>,
+    pub lines: Option<String>,
+    pub links_up_to_date: Option<String>,
+    pub local_name: Option<String>,
+    pub company: Option<String>,
+    pub template: Option<String>,
+    pub manager: Option<String>,
+    pub pages: Option<String>,
 }
 
 impl OpenXmlElementInfo for AppProperties {

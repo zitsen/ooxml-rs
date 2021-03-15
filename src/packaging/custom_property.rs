@@ -24,9 +24,9 @@ use crate::packaging::namespace::Namespaces;
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"), rename = "property")]
 pub struct CustomProperty {
-    fmtid: String,
-    pid: String,
-    name: String,
+    pub fmtid: String,
+    pub pid: String,
+    pub name: String,
     #[serde(rename = "$value")]
     value: Variant,
 }
