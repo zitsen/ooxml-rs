@@ -1,3 +1,15 @@
+<a name="v0.2.3"></a>
+## v0.2.3 Office OpenXML parser (2021-04-08)
+
+
+#### Bug Fixes
+
+*   fix missing field  in shared string ([13a75001](https://github.com/zitsen/ooxml-rs/commit/13a75001dc79b414522547bfb98a383b54cec5d0))
+* **changelog:**  use package version in changelog ([8be1e74f](https://github.com/zitsen/ooxml-rs/commit/8be1e74f67960d0c9b93fb212fdbcbc6ef7575db))
+* **packaging:**  make (*)Properties fields public, close #4 ([5abffe80](https://github.com/zitsen/ooxml-rs/commit/5abffe801b2277d67fd1751baf001d6e56bf7dd3))
+
+
+
 <a name=""></a>
 ##  Office OpenXML parser (2021-01-17)
 
