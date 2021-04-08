@@ -1,3 +1,13 @@
+<a name="v0.2.4"></a>
+## v0.2.4 Office OpenXML parser (2021-04-08)
+
+
+#### Features
+
+* **spreadsheet:**  add is_empty method for Cell ([3ed27d71](https://github.com/zitsen/ooxml-rs/commit/3ed27d7109526d4f00a7e484910021e7f157c4a4))
+
+
+
 <a name="v0.2.3"></a>
 ## v0.2.3 Office OpenXML parser (2021-04-08)
 
