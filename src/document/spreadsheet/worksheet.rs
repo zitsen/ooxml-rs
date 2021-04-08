@@ -115,12 +115,17 @@ pub struct SheetCellIs {
 //     v: Option<CellValue>,
 // }
 
+/// Sheet column definition.
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "c")]
 pub struct SheetCol {
+    /// Row expression
     pub r: String,
+    /// Type
     pub t: Option<String>,
+    /// Style
     pub s: Option<usize>,
+    // TODO: what is SheetCellIs?
     pub is: Option<SheetCellIs>,
     //#[serde(rename = "$value")]
     // pub v: String,
@@ -134,7 +139,9 @@ impl SheetCol {
         } else if let Some(v) = self.v.as_ref() {
             return v.as_str();
         } else {
-            unreachable!()
+            //dbg!(&self);
+            ""
+            //unreachable!()
         }
         // self.v.as_str()
     }
@@ -143,6 +150,9 @@ impl SheetCol {
         CellValue::String(self.as_raw_str().to_string())
     }
     pub fn cell_type(&self) -> CellType {
+        if self.t.is_none() && self.v.is_none() {
+            return CellType::Empty;
+        }
         match (self.t.as_ref(), self.s.as_ref()) {
             (None, None) => CellType::Raw,
             (Some(t), None) => match t {

@@ -23,12 +23,14 @@ pub struct Value(String);
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all(deserialize = "camelCase"), rename = "si")]
 pub struct SharedString {
-    t: Value,
+    t: Option<String>,
 }
-
 impl SharedString {
     pub fn as_str(&self) -> &str {
-        self.t.0.as_str()
+        match &self.t {
+            Some(s) => s.as_str(),
+            None => "",
+        }
     }
 }
 
@@ -155,8 +157,9 @@ impl SharedStringsPart {
 }
 #[test]
 fn test_de() {
+    const file: &str = "examples/sharedString-missing-t/xl/sharedStrings.xml";
     //const raw: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="14" uniqueCount="5"><si><t>name</t></si><si><t>age</t></si><si><t>张三</t></si><si><t>李四</t></si><si><t>王五</t></si></sst>"#;
-    let value = SharedStringsPart::from_xml_file("examples/simple-spreadsheet/xl/sharedStrings.xml").unwrap();
+    let value = SharedStringsPart::from_xml_file(file).unwrap();
     // println!("{}", raw);
     // let value: SharedStringsPart = quick_xml::de::from_str(raw).unwrap();
     println!("{:?}", value);
