@@ -391,6 +391,21 @@ impl<'a> Cell<'a> {
         unimplemented!()
     }
 
+
+    pub fn is_empty(&self) -> bool {
+        let inner = self.inner();
+        if inner.is_none() {
+            return true;
+        }
+        let inner = inner.unwrap();
+        let raw = inner.as_raw_str();
+        let ctype = inner.cell_type();
+        match ctype {
+            cell::CellType::Empty => true,
+            _ => false,
+        }
+    }
+
     pub fn is_merged_cell(&self) -> bool {
         unimplemented!()
     }
