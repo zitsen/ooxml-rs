@@ -156,6 +156,7 @@ impl SharedStringsPart {
     }
 }
 #[test]
+#[ignore]
 fn test_de() {
     const file: &str = "examples/sharedString-missing-t/xl/sharedStrings.xml";
     //const raw: &str = r#"<?xml version="1.0" encoding="UTF-8" standalone="yes"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="14" uniqueCount="5"><si><t>name</t></si><si><t>age</t></si><si><t>张三</t></si><si><t>李四</t></si><si><t>王五</t></si></sst>"#;
