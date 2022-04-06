@@ -68,7 +68,8 @@ impl SpreadsheetParts {
         let shared_strings = {
             let package = package.borrow();
             let part = package.get_part("xl/sharedStrings.xml").unwrap();
-            SharedStringsPart::from_xml_reader(part.as_part_bytes()).expect("workbook shared strings error")
+            SharedStringsPart::from_xml_reader(part.as_part_bytes())
+                .expect("workbook shared strings error")
         };
         let styles = {
             let package = package.borrow();
@@ -119,8 +120,8 @@ impl SpreadsheetParts {
             let part = package
                 .get_part(&format!("xl/{}", worksheet_uri))
                 .expect("get worksheet part by uri");
-            let sheet =
-                WorksheetPart::from_xml_reader(part.as_part_bytes()).expect("parse worksheet error");
+            let sheet = WorksheetPart::from_xml_reader(part.as_part_bytes())
+                .expect("parse worksheet error");
 
             self.worksheets.insert(worksheet_uri.into(), sheet);
         }
@@ -159,7 +160,7 @@ pub struct Worksheet {
 impl Worksheet {
     pub fn dimenstion(&self) -> Option<(usize, usize)> {
         // self.part.dimension()
-        self.part.dimension().or_else(||self.part.real_dimension())
+        self.part.dimension().or_else(|| self.part.real_dimension())
     }
     pub fn get_row_size(&self) -> usize {
         self.dimenstion().unwrap_or_default().0
@@ -212,7 +213,7 @@ impl Worksheet {
                 None
             }
         }
-        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d|h|ss|a{2,5}").unwrap();
+        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d+|h|ss|a{2,5}").unwrap();
 
         let datetime_replaces = vec![
             (regex::Regex::new(":mm").unwrap(), ":%M"),
@@ -222,8 +223,9 @@ impl Worksheet {
             (regex::Regex::new("yy+").unwrap(), "%y"),
             (regex::Regex::new("mmmm+").unwrap(), "%B"),
             (regex::Regex::new("mmm").unwrap(), "%b"),
-            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%m"),
-            (regex::Regex::new("d+").unwrap(), "%d"),
+            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%-m"),
+            (regex::Regex::new("d{2,}").unwrap(), "%d"),
+            (regex::Regex::new("d{1}").unwrap(), "%-d"),
             (regex::Regex::new("a{4,}").unwrap(), "%A"),
             (regex::Regex::new("a{3}").unwrap(), "%a"),
             (regex::Regex::new("a{2}").unwrap(), "%w"),
@@ -257,79 +259,81 @@ impl Worksheet {
     }
     /// Format a cell's raw value with given cell style id.
     pub fn format_cell_with(&self, raw: &str, style_id: usize) -> Option<String> {
-        let parts = self.parts.as_ref().borrow();
-        let cs = parts.get_cell_format(style_id);
-        let cs = cs.unwrap();
-        // if !cs.apply_number_format() {
-        // let font = dbg!(cs.font());
-        // let fill = dbg!(cs.fill());
+        self.to_cell_value(raw, style_id).map(|v| v.to_string())
+        // let parts = self.parts.as_ref().borrow();
+        // let cs = parts.get_cell_format(style_id);
+        // let cs = cs.unwrap();
+        // // if !cs.apply_number_format() {
+        // // let font = dbg!(cs.font());
+        // // let fill = dbg!(cs.fill());
+        // // }
+        // let nf = cs.number_format();
+        // if nf.is_none() {
+        //     dbg!(raw, style_id, cs);
+        //     // dbg!(cs.xf());
+        //     return Some(raw.to_string());
         // }
-        let nf = cs.number_format();
-        if nf.is_none() {
-            dbg!(raw, style_id);
-            // dbg!(cs.xf());
-            return Some(raw.to_string());
-        }
-        let nf = nf.unwrap();
-        let code = nf.code.as_str();
-        //println!("code: {}", code);
+        // let nf = nf.unwrap();
+        // let code = nf.code.as_str();
+        // //println!("code: {}", code);
 
-        fn parse_datetime(raw: &str) -> Option<chrono::NaiveDateTime> {
-            if let Ok(days) = raw.parse::<i64>() {
-                let days = days - 25569;
-                let secs = days * 86400;
-                chrono::NaiveDateTime::from_timestamp_opt(secs, 0)
-            } else if let Ok(datetime) = raw.parse::<f64>() {
-                let unix_days = datetime - 25569.;
-                let unix_secs = unix_days * 86400.;
-                let secs = unix_secs.trunc() as i64;
-                let nsecs = (unix_secs.fract().abs() * 1e9) as u32;
-                chrono::NaiveDateTime::from_timestamp_opt(secs, nsecs)
-            } else {
-                None
-            }
-        }
-        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d|h|ss|a{2,5}").unwrap();
+        // fn parse_datetime(raw: &str) -> Option<chrono::NaiveDateTime> {
+        //     if let Ok(days) = raw.parse::<i64>() {
+        //         let days = days - 25569;
+        //         let secs = days * 86400;
+        //         chrono::NaiveDateTime::from_timestamp_opt(secs, 0)
+        //     } else if let Ok(datetime) = raw.parse::<f64>() {
+        //         let unix_days = datetime - 25569.;
+        //         let unix_secs = unix_days * 86400.;
+        //         let secs = unix_secs.trunc() as i64;
+        //         let nsecs = (unix_secs.fract().abs() * 1e9) as u32;
+        //         chrono::NaiveDateTime::from_timestamp_opt(secs, nsecs)
+        //     } else {
+        //         None
+        //     }
+        // }
+        // let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d+|h|ss|a{2,5}").unwrap();
 
-        let datetime_replaces = vec![
-            (regex::Regex::new(":mm").unwrap(), ":%M"),
-            (regex::Regex::new("mm:").unwrap(), "%M:"),
-            (regex::Regex::new("mm").unwrap(), "%m"),
-            (regex::Regex::new("yyyy+").unwrap(), "%Y"),
-            (regex::Regex::new("yy+").unwrap(), "%y"),
-            (regex::Regex::new("mmmm+").unwrap(), "%B"),
-            (regex::Regex::new("mmm").unwrap(), "%b"),
-            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%m"),
-            (regex::Regex::new("d+").unwrap(), "%d"),
-            (regex::Regex::new("a{4,}").unwrap(), "%A"),
-            (regex::Regex::new("a{3}").unwrap(), "%a"),
-            (regex::Regex::new("a{2}").unwrap(), "%w"),
-            (regex::Regex::new("h").unwrap(), "%H"),
-            (regex::Regex::new("ss").unwrap(), "%S"),
-            (regex::Regex::new("\\\\").unwrap(), ""),
-        ];
-        let s = match code {
-            s if s == "General" => raw.to_string(),
-            format if datetime_re.is_match(format) | format.ends_with(";@") => {
-                // dbg!(&format);
-                let format = format.trim_end_matches(";@");
-                let datetime = parse_datetime(raw).unwrap();
+        // let datetime_replaces = vec![
+        //     (regex::Regex::new(":mm").unwrap(), ":%M"),
+        //     (regex::Regex::new("mm:").unwrap(), "%M:"),
+        //     (regex::Regex::new("mm").unwrap(), "%m"),
+        //     (regex::Regex::new("yyyy+").unwrap(), "%Y"),
+        //     (regex::Regex::new("yy+").unwrap(), "%y"),
+        //     (regex::Regex::new("mmmm+").unwrap(), "%B"),
+        //     (regex::Regex::new("mmm").unwrap(), "%b"),
+        //     (regex::Regex::new("([^%]|^)m").unwrap(), "$1%-m"),
+        //     (regex::Regex::new("d{2,}").unwrap(), "%d"),
+        //     (regex::Regex::new("d{1}").unwrap(), "%-d"),
+        //     (regex::Regex::new("a{4,}").unwrap(), "%A"),
+        //     (regex::Regex::new("a{3}").unwrap(), "%a"),
+        //     (regex::Regex::new("a{2}").unwrap(), "%w"),
+        //     (regex::Regex::new("h").unwrap(), "%H"),
+        //     (regex::Regex::new("ss").unwrap(), "%S"),
+        //     (regex::Regex::new("\\\\").unwrap(), ""),
+        // ];
+        // let s = match code {
+        //     s if s == "General" => raw.to_string(),
+        //     format if datetime_re.is_match(format) | format.ends_with(";@") => {
+        //         // dbg!(&format);
+        //         let format = format.trim_end_matches(";@");
+        //         let datetime = parse_datetime(raw).unwrap();
 
-                let format = datetime_replaces
-                    .iter()
-                    .fold(snailquote::unescape(format).unwrap(), |f, (re, s)| {
-                        re.replace_all(&f, *s).to_string()
-                    });
-                // dbg!(&format);
-                format!("{}", datetime.format(&format))
-            }
-            s => {
-                // FIXME(@zitsen): support custom format like dollars, etc.
-                eprintln!("unimplemented format support: {}", s);
-                raw.to_string()
-            }
-        };
-        Some(s)
+        //         let format = datetime_replaces
+        //             .iter()
+        //             .fold(snailquote::unescape(format).unwrap(), |f, (re, s)| {
+        //                 re.replace_all(&f, *s).to_string()
+        //             });
+        //         // dbg!(&format);
+        //         format!("{}", datetime.format(&format))
+        //     }
+        //     s => {
+        //         // FIXME(@zitsen): support custom format like dollars, etc.
+        //         eprintln!("unimplemented format support: {}", s);
+        //         raw.to_string()
+        //     }
+        // };
+        // Some(s)
     }
     pub fn get_cell_type(&self, idx: usize) {
         unimplemented!()
@@ -390,7 +394,6 @@ impl<'a> Cell<'a> {
     pub fn cell_type(&self) {
         unimplemented!()
     }
-
 
     pub fn is_empty(&self) -> bool {
         let inner = self.inner();
@@ -648,8 +651,7 @@ impl SpreadsheetDocument {
 
 #[test]
 fn open() {
-    let xlsx =
-        SpreadsheetDocument::open("examples/simple-spreadsheet/data-image-demo.xlsx").unwrap();
+    let xlsx = SpreadsheetDocument::open("examples/issue-12/demo.xlsx").unwrap();
 
     let workbook = xlsx.get_workbook();
     //println!("{:?}", xlsx);

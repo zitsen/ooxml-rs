@@ -2,13 +2,13 @@
 name = "ooxml"
 version = "0.2.5-alpha.0"
 authors = ["Huo Linhe <linhehuo@gmail.com>"]
+documentation = "https://docs.rs/ooxml"
 edition = "2018"
 keywords = ["xml", "office", "docx", "excel", "xlsx"]
 license = "MIT OR Apache-2.0"
-description = "An Office OpenXML parser writen in Rust"
-documentation = "https://docs.rs/ooxml"
 readme = "README.md"
 repository = "https://github.com/zitsen/ooxml-rs"
+description = "An Office OpenXML parser writen in Rust"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -17,20 +17,21 @@ pre-release-commit-message = "release: {{version}}"
 post-release-commit-message = "chore(dev): start next development iteration {{version}}"
 
 [dependencies]
-log = "0.4.11"
-derivative = "2.1.1"
-quick-xml = { version = "0.22", features = ["serialize"] }
-serde = {version = "1", features = ["derive"]}
-serde_json = "1"
-thiserror = "1"
-zip = "0.6"
-url = "2.1.1"
-mime = "0.3.16"
-minidom = "0.14"
-linked-hash-map = { version = "0.5.3", features = ["serde_impl"] }
-paste = "1"
 chrono = { version = "0.4.19", features = ["serde"] }
+derivative = "2.1.1"
+linked-hash-map = { version = "0.5.3", features = ["serde_impl"] }
+log = "0.4.11"
+mime = "0.3.16"
+minidom = "0.14.0"
+paste = "1"
+quick-xml = { version = "0.20.0", features = ["serialize"] }
 regex = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 snailquote = "0.3.0"
+static_init = "1.0.2"
+thiserror = "1"
+url = "2.1.1"
+zip = "0.6.2"
 [dev-dependencies]
 itertools = "0.10"

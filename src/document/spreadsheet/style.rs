@@ -6,9 +6,18 @@ use serde::{Deserialize, Serialize};
 #[serde(rename = "numFmt")]
 pub struct NumberFormat {
     #[serde(rename = "numFmtId")]
-    id: usize,
+    pub id: usize,
     #[serde(rename = "formatCode")]
     pub code: String,
+}
+
+impl NumberFormat {
+    pub fn new(id: usize, code: impl Into<String>) -> Self {
+        Self {
+            id,
+            code: code.into(),
+        }
+    }
 }
 
 impl OpenXmlElementInfo for NumberFormat {
@@ -308,10 +317,7 @@ impl StylesPart {
     }
     pub fn get_cell_format_component<'a>(&'a self, id: usize) -> Option<CellFormatComponent<'a>> {
         let xf = self.get_cell_xf(id);
-        xf.map(|xf| CellFormatComponent {
-            styles: self,
-            xf,
-        })
+        xf.map(|xf| CellFormatComponent { styles: self, xf })
     }
 
     pub fn get_cell_style_component<'a>(&'a self, id: usize) -> Option<CellStyleComponent<'a>> {
@@ -351,12 +357,95 @@ impl StylesPart {
     }
     /// Get cell style by id, 0-based.
     pub fn get_number_format(&self, id: usize) -> Option<&NumberFormat> {
+        use static_init::dynamic;
+
+        //
+        // 1 0
+        // 2 0.00
+        // 3 #,##0
+        // 4 #,##0.00
+        // 5 $#,##0_);($#,##0)
+        // 6 $#,##0_);[Red]($#,##0)
+        // 7 $#,##0.00_);($#,##0.00)
+        // 8 $#,##0.00_);[Red]($#,##0.00)
+        // 9 0%
+        // 10 0.00%
+        // 11 0.00E+00
+        // 12 # ?/?
+        // 13 # ??/??
+        // 14 m/d/yyyy
+        // 15 d-mmm-yy
+        // 16 d-mmm
+        // 17 mmm-yy
+        // 18 h:mm AM/PM
+        // 19 h:mm:ss AM/PM
+        // 20 h:mm
+        // 21 h:mm:ss
+        // 22 m/d/yyyy h:mm
+        // 37 #,##0_);(#,##0)
+        // 38 #,##0_);[Red](#,##0)
+        // 39 #,##0.00_);(#,##0.00)
+        // 40 #,##0.00_);[Red](#,##0.00)
+        // 45 mm:ss
+        // 46 [h]:mm:ss
+        // 47 mm:ss.0
+        // 48 ##0.0E+0
+        // 49 @
+        macro_rules! _num_fmt {
+            ($id:expr, $code:expr) => {
+                NumberFormat {
+                    id: $id,
+                    code: $code.to_string(),
+                }
+            };
+        }
+        #[dynamic]
+        static BUILTIN_NUMBER_FORMATS: Vec<NumberFormat> = vec![
+            NumberFormat::new(0, "General"),
+            NumberFormat::new(1, "0"),
+            NumberFormat::new(2, "0.00"),
+            NumberFormat::new(3, "#,##0"),
+            NumberFormat::new(4, "#,##0.00"),
+            NumberFormat::new(5, "$#,##0_);($#,##0)"),
+            NumberFormat::new(6, "$#,##0_);[Red]($#,##0)"),
+            NumberFormat::new(7, "$#,##0.00_);($#,##0.00)"),
+            NumberFormat::new(8, "$#,##0.00_);[Red]($#,##0.00)"),
+            NumberFormat::new(9, "0%"),
+            NumberFormat::new(10, "0.00%"),
+            NumberFormat::new(11, "0.00E+00"),
+            NumberFormat::new(12, "# ?/?"),
+            NumberFormat::new(13, "# ??/??"),
+            NumberFormat::new(14, "yyyy/m/d"),
+            NumberFormat::new(15, "d-mmm-yy"),
+            NumberFormat::new(16, "d-mmm"),
+            NumberFormat::new(17, "mmm-yy"),
+            NumberFormat::new(18, "h:mm AM/PM"),
+            NumberFormat::new(19, "h:mm:ss AM/PM"),
+            NumberFormat::new(20, "h:mm"),
+            NumberFormat::new(21, "h:mm:ss"),
+            NumberFormat::new(22, "m/d/yyyy h:mm"),
+            NumberFormat::new(37, "#,##0_);(#,##0)"),
+            NumberFormat::new(38, "#,##0_);[Red](#,##0)"),
+            NumberFormat::new(39, "#,##0.00_);(#,##0.00)"),
+            NumberFormat::new(40, "#,##0.00_);[Red](#,##0.00)"),
+            NumberFormat::new(45, "mm:ss"),
+            NumberFormat::new(46, "[h]:mm:ss"),
+            NumberFormat::new(47, "mm:ss.0"),
+            NumberFormat::new(48, "##0.0E+0"),
+            NumberFormat::new(49, "@"),
+        ];
+
+        if id < 50 {
+            return BUILTIN_NUMBER_FORMATS.get(id);
+        }
         self.num_fmts
             .as_ref()
             //.and_then(|inner| inner.num_fmt.get(id))
             .and_then(|inner| inner.num_fmt.as_ref())
             .and_then(|inner| inner.iter().find(|nf| nf.id == id))
     }
+
+    // pub fn get_number_format_xf(&self, id: usize) ->
     pub fn get_font(&self, id: usize) -> Option<&Font> {
         self.fonts.as_ref().and_then(|fonts| fonts.fonts.get(id))
     }
