@@ -1,3 +1,13 @@
+<a name="v0.2.5"></a>
+## v0.2.5 Office OpenXML parser (2022-04-06)
+
+
+#### Bug Fixes
+
+* **xlsx:**  add builtin number formats support ([b0ab613c](https://github.com/zitsen/ooxml-rs/commit/b0ab613c937e0ca0686e4ae7c8a43f1b5fa0a1b9))
+
+
+
 <a name="v0.2.4"></a>
 ## v0.2.4 Office OpenXML parser (2021-04-08)
 
