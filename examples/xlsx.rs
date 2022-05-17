@@ -1,8 +1,14 @@
 use ooxml::document::SpreadsheetDocument;
+use std::env;
 
 fn main() {
-    let xlsx =
-        SpreadsheetDocument::open("examples/simple-spreadsheet/data-image-demo.xlsx").unwrap();
+    let input = env::args()
+        .into_iter()
+        .skip(1)
+        .next()
+        .unwrap_or("examples/simple-spreadsheet/data-image-demo.xlsx".to_string());
+    println!("input xlsx: {input}");
+    let xlsx = SpreadsheetDocument::open(input).unwrap();
 
     let workbook = xlsx.get_workbook();
     //println!("{:?}", xlsx);

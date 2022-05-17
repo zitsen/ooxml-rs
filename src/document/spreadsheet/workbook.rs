@@ -70,7 +70,11 @@ pub struct WorkbookPart {
 
 impl WorkbookPart {
     pub fn sheet_names(&self) -> Vec<&str> {
-        self.sheets.sheets.iter().map(|sheet| sheet.name.as_str()).collect()
+        self.sheets
+            .sheets
+            .iter()
+            .map(|sheet| sheet.name.as_str())
+            .collect()
     }
 }
 impl OpenXmlElementInfo for WorkbookPart {

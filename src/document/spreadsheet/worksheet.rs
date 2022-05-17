@@ -135,7 +135,7 @@ pub struct SheetCol {
 impl SheetCol {
     pub fn as_raw_str(&self) -> &str {
         if let Some(is) = self.is.as_ref() {
-            return is.t.as_ref().expect("inline str error")
+            return is.t.as_ref().expect("inline str error");
         } else if let Some(v) = self.v.as_ref() {
             return v.as_str();
         } else {
@@ -146,7 +146,6 @@ impl SheetCol {
         // self.v.as_str()
     }
     pub fn raw_value(&self) -> CellValue {
-        
         CellValue::String(self.as_raw_str().to_string())
     }
     pub fn cell_type(&self) -> CellType {
@@ -156,18 +155,26 @@ impl SheetCol {
         match (self.t.as_ref(), self.s.as_ref()) {
             (None, None) => CellType::Raw,
             (Some(t), None) => match t {
-                s if s == "s" => {
-                    CellType::Shared(self.v.as_ref().expect("shared string has no id").parse().expect("sharedString id not valid"))
-                }
+                s if s == "s" => CellType::Shared(
+                    self.v
+                        .as_ref()
+                        .expect("shared string has no id")
+                        .parse()
+                        .expect("sharedString id not valid"),
+                ),
                 n if n == "n" => CellType::Number,
                 t if t == "inlineStr" => CellType::Raw,
                 t => unimplemented!("cell type not supported: {}", t),
             },
             (None, Some(s)) => CellType::Styled(*s),
             (Some(t), Some(s)) => match t {
-                t if t == "s" => {
-                    CellType::Shared(self.v.as_ref().expect("shared string has no id").parse().expect("sharedString id not valid"))
-                }
+                t if t == "s" => CellType::Shared(
+                    self.v
+                        .as_ref()
+                        .expect("shared string has no id")
+                        .parse()
+                        .expect("sharedString id not valid"),
+                ),
                 t if t == "n" => CellType::StyledNumber(*s),
                 t if t == "inlineStr" => CellType::Raw,
                 t => unimplemented!("cell type not supported: {}", t),
@@ -195,7 +202,7 @@ pub struct SheetRow {
     pub ht: Option<f64>,
     pub spans: Option<String>,
     #[serde(rename = "c")]
-    pub cols: Vec<SheetCol>,
+    pub cols: Option<Vec<SheetCol>>,
 }
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "sheetData")]
@@ -249,7 +256,6 @@ pub struct WorksheetPart {
 }
 
 impl WorksheetPart {
-    
     /// calculate dimension from dimension element if exists.
     pub fn dimension(&self) -> Option<(usize, usize)> {
         self.dimension.as_ref().and_then(|dim| dim.dimension())

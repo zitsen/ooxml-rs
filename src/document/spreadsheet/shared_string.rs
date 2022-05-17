@@ -67,7 +67,10 @@ pub struct SharedStringsPart {
 
 impl SharedStringsPart {
     pub fn get_shared_string(&self, idx: usize) -> Option<&str> {
-        self.strings.as_ref().and_then(|ss| ss.get(idx)).map(|ss| ss.as_str())
+        self.strings
+            .as_ref()
+            .and_then(|ss| ss.get(idx))
+            .map(|ss| ss.as_str())
     }
 }
 

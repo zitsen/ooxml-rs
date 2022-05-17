@@ -389,7 +389,7 @@ impl<'a> Cell<'a> {
         data.rows
             .as_ref()
             .and_then(|rows| rows.get(self.row))
-            .and_then(|row| row.cols.get(self.col))
+            .and_then(|row| row.cols.as_ref().and_then(|cols| cols.get(self.col)))
     }
     pub fn cell_type(&self) {
         unimplemented!()

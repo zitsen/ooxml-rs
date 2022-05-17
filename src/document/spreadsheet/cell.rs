@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::{DateTime, NaiveDateTime, Local};
+use chrono::{DateTime, Local, NaiveDateTime};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
