@@ -1,2 +1,1 @@
 pre-release-hook = ["./clog.sh"]
-exclude-paths = ["/README.md", "/tests/**", "/examples/**"]
