@@ -1,3 +1,13 @@
+<a name="v0.2.6"></a>
+## v0.2.6 Office OpenXML parser (2022-05-17)
+
+
+#### Bug Fixes
+
+* **xlsx:**  fix missing field 'c' when parsing xlsx, close #7 ([8659144f](https://github.com/zitsen/ooxml-rs/commit/8659144ff08a0ec7b773a36c8f347cf838c43b61))
+
+
+
 <a name="v0.2.6-alpha.0"></a>
 ## v0.2.6-alpha.0 Office OpenXML parser (2022-05-17)
 
