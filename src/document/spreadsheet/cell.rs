@@ -26,10 +26,9 @@ pub enum CellValue {
 }
 
 impl Display for CellValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-       
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {       
         match self {
-            CellValue::Null =>  write!(f, "{}", self.to_string()),
+            CellValue::Null =>  write!(f, "{}", ""),
             CellValue::String(v) =>  write!(f, "{}", v),
             CellValue::Raw(v) => write!(f, "{}", v),
             CellValue::Bool(_v) => panic!("unsupported cell type: bool"),
