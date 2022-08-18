@@ -25,23 +25,17 @@ pub enum CellValue {
     Raw(String),
 }
 
-impl CellValue {
-    pub fn to_string(&self) -> String {
+impl Display for CellValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {       
         match self {
-            CellValue::Null => "".to_string(),
-            CellValue::String(v) => v.clone(),
-            CellValue::Raw(v) => v.clone(),
-            CellValue::Bool(_b) => panic!("unsupported cell type: bool"),
-            CellValue::Double(f) => format!("{}", f),
-            CellValue::DateTime(datetime, format) => format!("{}", datetime.format(&format)),
+            CellValue::Null =>  write!(f, "{}", ""),
+            CellValue::String(v) =>  write!(f, "{}", v),
+            CellValue::Raw(v) => write!(f, "{}", v),
+            CellValue::Bool(_v) => panic!("unsupported cell type: bool"),
+            CellValue::Double(v) => write!(f, "{}", v),
+            CellValue::DateTime(datetime, format) => write!(f, "{}", datetime.format(&format)),
             _ => unimplemented!(),
         }
-    }
-}
-
-impl Display for CellValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.to_string())
     }
 }
 
