@@ -14,7 +14,7 @@ description = "An Office OpenXML parser writen in Rust"
 
 [package.metadata.release]
 pre-release-commit-message = "release: {{version}}"
-post-release-commit-message = "chore(dev): start next development iteration {{version}}"
+# post-release-commit-message = "chore(dev): start next development iteration {{version}}"
 
 [dependencies]
 chrono = { version = "0.4.19", features = ["serde"] }
