@@ -1,3 +1,9 @@
+<a name="v0.2.7"></a>
+## v0.2.7 Office OpenXML parser (2023-08-16)
+
+
+
+
 <a name="v0.2.6"></a>
 ## v0.2.6 Office OpenXML parser (2023-08-16)
 
