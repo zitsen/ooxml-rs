@@ -5,6 +5,12 @@
 
 
 <a name="v0.2.6"></a>
+## v0.2.6 Office OpenXML parser (2023-08-16)
+
+
+
+
+<a name="v0.2.6"></a>
 ## v0.2.6 Office OpenXML parser (2022-05-17)
 
 
