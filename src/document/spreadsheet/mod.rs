@@ -1,7 +1,6 @@
 //! Excel file format .xlsx document implementation.
 
-use std::{borrow::Cow, cell::RefCell};
-use std::{path::Path, rc::Rc};
+use std::{cell::RefCell, path::Path, rc::Rc};
 
 // use derivative::Derivative;
 use derivative::Derivative;
@@ -176,7 +175,7 @@ impl Worksheet {
         let parts = self.parts.as_ref().borrow();
         let cs = parts.get_cell_style(id);
         let cs = cs.unwrap();
-        let nf = cs.number_format();
+        let _nf = cs.number_format();
         unimplemented!()
     }
     /// Format a cell's raw value with given cell style id.
@@ -242,7 +241,7 @@ impl Worksheet {
 
                 let format = datetime_replaces
                     .iter()
-                    .fold(snailquote::unescape(format).unwrap(), |f, (re, s)| {
+                    .fold(escape8259::unescape(format).unwrap(), |f, (re, s)| {
                         re.replace_all(&f, *s).to_string()
                     });
                 // dbg!(&format);
@@ -335,7 +334,7 @@ impl Worksheet {
         // };
         // Some(s)
     }
-    pub fn get_cell_type(&self, idx: usize) {
+    pub fn get_cell_type(&self, _idx: usize) {
         unimplemented!()
     }
 }
@@ -401,7 +400,7 @@ impl<'a> Cell<'a> {
             return true;
         }
         let inner = inner.unwrap();
-        let raw = inner.as_raw_str();
+        let _raw = inner.as_raw_str();
         let ctype = inner.cell_type();
         match ctype {
             cell::CellType::Empty => true,

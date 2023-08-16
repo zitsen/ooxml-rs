@@ -291,7 +291,6 @@ impl OpenXmlSerialize for WorksheetPart {
     }
     fn write_inner<W: std::io::Write>(&self, writer: W) -> Result<(), crate::error::OoxmlError> {
         let mut xml = quick_xml::Writer::new(writer);
-        use quick_xml::events::*;
 
         quick_xml::se::to_writer(xml.inner(), &self.sheet_pr)?;
         quick_xml::se::to_writer(xml.inner(), &self.sheet_views)?;

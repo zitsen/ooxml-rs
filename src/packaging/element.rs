@@ -7,7 +7,6 @@ use std::{borrow::Cow, fs::File, io::prelude::*, path::Path};
 use crate::error::OoxmlError;
 
 use quick_xml::events::attributes::Attribute;
-use quick_xml::events::*;
 
 use super::namespace::Namespaces;
 

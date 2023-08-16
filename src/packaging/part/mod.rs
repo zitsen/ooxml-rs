@@ -10,6 +10,7 @@ use std::path::PathBuf;
 
 #[derive(Debug, Clone, Default)]
 pub struct OpenXmlPart {
+    #[allow(dead_code)]
     uri: PathBuf,
     content_type: Option<ContentType>,
     raw: Cursor<Vec<u8>>,

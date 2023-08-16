@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use chrono::{DateTime, Local, NaiveDateTime};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
@@ -26,10 +26,10 @@ pub enum CellValue {
 }
 
 impl Display for CellValue {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {       
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CellValue::Null =>  write!(f, "{}", ""),
-            CellValue::String(v) =>  write!(f, "{}", v),
+            CellValue::Null => write!(f, "{}", ""),
+            CellValue::String(v) => write!(f, "{}", v),
             CellValue::Raw(v) => write!(f, "{}", v),
             CellValue::Bool(_v) => panic!("unsupported cell type: bool"),
             CellValue::Double(v) => write!(f, "{}", v),
