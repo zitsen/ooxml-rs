@@ -199,7 +199,7 @@ pub struct CellXfs {
 pub struct CellStyle {
     name: String,
     xf_id: usize,
-    builtin_id: usize,
+    builtin_id: Option<usize>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

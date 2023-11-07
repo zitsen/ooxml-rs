@@ -91,8 +91,8 @@ impl Dimension {
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "calcPr")]
 pub struct Selection {
-    active_cell: String,
-    sqref: String,
+    active_cell: Option<String>,
+    sqref: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
