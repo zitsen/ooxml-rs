@@ -1,3 +1,13 @@
+<a name="v0.2.8"></a>
+## v0.2.8 Office OpenXML parser (2023-11-07)
+
+
+#### Bug Fixes
+
+*   missing field deserialization error activeCell/builtinId ([58f85a9a](https://github.com/zitsen/ooxml-rs/commit/58f85a9a31879ab5018a9a9cce163c02c93fc1f3))
+
+
+
 <a name="v0.2.7"></a>
 ## v0.2.7 Office OpenXML parser (2023-08-16)
 
