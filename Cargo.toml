@@ -1,6 +1,6 @@
 [package]
 name = "ooxml"
-version = "0.2.7"
+version = "0.2.8"
 authors = ["Huo Linhe <linhehuo@gmail.com>"]
 documentation = "https://docs.rs/ooxml"
 edition = "2018"
