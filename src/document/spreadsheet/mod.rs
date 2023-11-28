@@ -1,6 +1,6 @@
 //! Excel file format .xlsx document implementation.
 
-use std::{cell::RefCell, path::Path, rc::Rc};
+use std::{cell::RefCell, path::Path, rc::Rc, io::{Read, Seek, Cursor}};
 
 // use derivative::Derivative;
 use derivative::Derivative;
@@ -607,9 +607,7 @@ impl SpreadsheetDocument {
         }
     }
 
-    /// Open existing spreadsheet file and parse.
-    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
-        let package = OpenXmlPackage::open(path)?;
+    fn from_package(package:OpenXmlPackage)->Result<Self> {
         let package = Rc::new(RefCell::new(package));
         let parts = SpreadsheetParts::from_package(package.clone());
         let parts = Rc::new(RefCell::new(parts));
@@ -623,6 +621,24 @@ impl SpreadsheetDocument {
             workbook,
             document_type,
         })
+    }
+
+    pub fn from_bytes(bytes: &[u8]) -> Result<Self> {
+        let c = Cursor::new(bytes);
+        let package = OpenXmlPackage::from_reader(c)?;
+        Self::from_package(package)
+    }
+
+    /// Open existing spreadsheet reader and parse.
+    pub fn from_reader<R: Read + Seek>(reader: R) -> Result<Self> {
+        let package = OpenXmlPackage::from_reader(reader)?;
+        Self::from_package(package)
+    }
+
+    /// Open existing spreadsheet file and parse.
+    pub fn open<P: AsRef<Path>>(path: P) -> Result<Self> {
+        let package = OpenXmlPackage::open(path)?;
+        Self::from_package(package)
     }
     /// Save as new file with `path`.
     pub fn save_as<P: AsRef<Path>>(&self, path: P) -> Result<()> {
@@ -646,6 +662,15 @@ impl SpreadsheetDocument {
     pub fn get_workbook_mut(&mut self) -> &mut Workbook {
         unimplemented!()
     }
+}
+
+#[test]
+fn from_bytes() {
+    let xlsx_bytes = include_bytes!("../../../examples/excel-demo/demo.xlsx");
+    let xlsx = SpreadsheetDocument::from_bytes(xlsx_bytes).unwrap();
+    let workbook = xlsx.get_workbook();
+    let _sheet_names = workbook.worksheet_names();
+    assert_eq!(_sheet_names,vec!["Sheet1","Sheet2"]);
 }
 
 #[test]
