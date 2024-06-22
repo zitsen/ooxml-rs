@@ -5,6 +5,8 @@ use std::{cell::RefCell, path::Path, rc::Rc, io::{Read, Seek, Cursor}};
 // use derivative::Derivative;
 use derivative::Derivative;
 
+use static_init::dynamic;
+
 use crate::{
     error::Result,
     packaging::element::*,
@@ -156,6 +158,29 @@ pub struct Worksheet {
     part: WorksheetPart,
 }
 
+#[dynamic(lazy)]
+static DATETIME_RE: regex::Regex = regex::Regex::new("y{1,4}|m{1,5}|d+|h|ss|a{2,5}").unwrap();
+
+#[dynamic(lazy)]
+static DATETIME_REPLACES: Vec<(regex::Regex, &'static str)> = vec![
+    (regex::Regex::new(":mm").unwrap(), ":%M"),
+    (regex::Regex::new("mm:").unwrap(), "%M:"),
+    (regex::Regex::new("mm").unwrap(), "%m"),
+    (regex::Regex::new("yyyy+").unwrap(), "%Y"),
+    (regex::Regex::new("yy+").unwrap(), "%y"),
+    (regex::Regex::new("mmmm+").unwrap(), "%B"),
+    (regex::Regex::new("mmm").unwrap(), "%b"),
+    (regex::Regex::new("([^%]|^)m").unwrap(), "$1%-m"),
+    (regex::Regex::new("d{2,}").unwrap(), "%d"),
+    (regex::Regex::new("d{1}").unwrap(), "%-d"),
+    (regex::Regex::new("a{4,}").unwrap(), "%A"),
+    (regex::Regex::new("a{3}").unwrap(), "%a"),
+    (regex::Regex::new("a{2}").unwrap(), "%w"),
+    (regex::Regex::new("h").unwrap(), "%H"),
+    (regex::Regex::new("ss").unwrap(), "%S"),
+    (regex::Regex::new("\\\\").unwrap(), ""),
+];
+
 impl Worksheet {
     pub fn dimenstion(&self) -> Option<(usize, usize)> {
         // self.part.dimension()
@@ -212,34 +237,14 @@ impl Worksheet {
                 None
             }
         }
-        let datetime_re = regex::Regex::new("y{1,4}|m{1,5}|d+|h|ss|a{2,5}").unwrap();
-
-        let datetime_replaces = vec![
-            (regex::Regex::new(":mm").unwrap(), ":%M"),
-            (regex::Regex::new("mm:").unwrap(), "%M:"),
-            (regex::Regex::new("mm").unwrap(), "%m"),
-            (regex::Regex::new("yyyy+").unwrap(), "%Y"),
-            (regex::Regex::new("yy+").unwrap(), "%y"),
-            (regex::Regex::new("mmmm+").unwrap(), "%B"),
-            (regex::Regex::new("mmm").unwrap(), "%b"),
-            (regex::Regex::new("([^%]|^)m").unwrap(), "$1%-m"),
-            (regex::Regex::new("d{2,}").unwrap(), "%d"),
-            (regex::Regex::new("d{1}").unwrap(), "%-d"),
-            (regex::Regex::new("a{4,}").unwrap(), "%A"),
-            (regex::Regex::new("a{3}").unwrap(), "%a"),
-            (regex::Regex::new("a{2}").unwrap(), "%w"),
-            (regex::Regex::new("h").unwrap(), "%H"),
-            (regex::Regex::new("ss").unwrap(), "%S"),
-            (regex::Regex::new("\\\\").unwrap(), ""),
-        ];
         let s = match code {
             s if s == "General" => CellValue::String(raw.to_string()),
-            format if datetime_re.is_match(format) | format.ends_with(";@") => {
+            format if DATETIME_RE.is_match(format) | format.ends_with(";@") => {
                 // dbg!(&format);
                 let format = format.trim_end_matches(";@");
                 let datetime = parse_datetime(raw).unwrap();
 
-                let format = datetime_replaces
+                let format = DATETIME_REPLACES
                     .iter()
                     .fold(escape8259::unescape(format).unwrap(), |f, (re, s)| {
                         re.replace_all(&f, *s).to_string()
