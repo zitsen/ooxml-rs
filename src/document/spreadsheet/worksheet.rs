@@ -6,6 +6,11 @@ use quick_xml::events::attributes::Attribute;
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 
+use static_init::dynamic;
+
+#[dynamic(lazy)]
+static DIMENSION_RE: regex::Regex = regex::Regex::new(r"(?P<col>[A-Z]+)(?P<row>\d+)").unwrap();
+
 #[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", rename = "sheetPr")]
 pub struct SheetPr {}
@@ -61,8 +66,7 @@ impl Dimension {
         let end = range[1];
         //let (start, end) = range.split_once(':').expect("split at :");
         fn rangify(range: &str) -> (usize, usize) {
-            let re: regex::Regex = regex::Regex::new(r"(?P<col>[A-Z]+)(?P<row>\d+)").unwrap();
-            let cap = re.captures(range).unwrap();
+            let cap = DIMENSION_RE.captures(range).unwrap();
             let col = cap.name("col").unwrap().as_str();
             let row = cap
                 .name("row")
